@@ -1,0 +1,11 @@
+export { Header } from './Header';
+export { Hero } from './Hero';
+export { Stats } from './Stats';
+export { About } from './About';
+export { CategoryList } from './CategoryList';
+export { Products } from './Products';
+export { Partners } from './Partners';
+export { News } from './News';
+export { Footer } from './Footer';
+export { Logo } from './Logo';
+export { SearchModal } from './SearchModal';
