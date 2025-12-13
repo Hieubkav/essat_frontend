@@ -2,33 +2,35 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-
-const BANNERS = [
-  {
-    id: 1,
-    image: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=1932&auto=format&fit=crop',
-    alt: 'Giai phap hoi nghi truyen hinh toan dien'
-  },
-  {
-    id: 2,
-    image: 'https://images.unsplash.com/photo-1551703599-6b3e8379aa8c?q=80&w=2074&auto=format&fit=crop',
-    alt: 'Ha tang may chu manh me'
-  },
-  {
-    id: 3,
-    image: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=2000&auto=format&fit=crop',
-    alt: 'Ket noi khong gioi han'
-  }
-];
+import { getHeroData, HeroSlide } from '@/lib/homeApi';
 
 export const Hero: React.FC = () => {
+  const [banners, setBanners] = useState<HeroSlide[]>([]);
   const [current, setCurrent] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const touchStartX = useRef<number | null>(null);
   const touchEndX = useRef<number | null>(null);
 
-  const length = BANNERS.length;
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const data = await getHeroData();
+        if (data?.slides && data.slides.length > 0) {
+          setBanners(data.slides);
+        }
+      } catch (error) {
+        console.error('Failed to fetch hero data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const length = banners.length;
 
   const nextSlide = useCallback(() => {
     setCurrent(current === length - 1 ? 0 : current + 1);
@@ -39,10 +41,10 @@ export const Hero: React.FC = () => {
   }, [current, length]);
 
   useEffect(() => {
-    if (isHovered) return;
+    if (isHovered || length === 0) return;
     const interval = setInterval(nextSlide, 5000);
     return () => clearInterval(interval);
-  }, [nextSlide, isHovered]);
+  }, [nextSlide, isHovered, length]);
 
   const handleTouchStart = (e: React.TouchEvent) => {
     setIsHovered(true);
@@ -71,6 +73,18 @@ export const Hero: React.FC = () => {
     touchEndX.current = null;
   };
 
+  if (isLoading) {
+    return (
+      <section className="relative w-full overflow-hidden bg-slate-900">
+        <div className="relative h-[250px] sm:h-[400px] lg:h-[600px] w-full animate-pulse bg-slate-800" />
+      </section>
+    );
+  }
+
+  if (banners.length === 0) {
+    return null;
+  }
+
   return (
     <section
       className="relative w-full overflow-hidden bg-slate-900 group select-none touch-pan-y cursor-grab active:cursor-grabbing"
@@ -81,9 +95,9 @@ export const Hero: React.FC = () => {
       onTouchEnd={handleTouchEnd}
     >
       <div className="relative h-[250px] sm:h-[400px] lg:h-[600px] w-full">
-        {BANNERS.map((banner, index) => (
+        {banners.map((banner, index) => (
           <div
-            key={banner.id}
+            key={index}
             className={`absolute inset-0 w-full h-full transition-opacity duration-700 ease-in-out ${
               index === current ? 'opacity-100 z-10' : 'opacity-0 z-0'
             }`}
@@ -124,7 +138,7 @@ export const Hero: React.FC = () => {
         </button>
 
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-30 flex gap-2">
-          {BANNERS.map((_, idx) => (
+          {banners.map((_, idx) => (
             <button
               key={idx}
               onClick={(e) => {

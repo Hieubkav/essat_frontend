@@ -1,9 +1,36 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Facebook, ChevronRight } from 'lucide-react';
+import { getFooterData, FooterConfig, SocialLink } from '@/lib/homeApi';
+
+// Helper function để lấy URL từ social_links array
+const getSocialUrl = (socialLinks: SocialLink[] | undefined, platform: string): string => {
+  const found = socialLinks?.find(s => s.platform === platform);
+  return found?.url || '#';
+};
 
 export const Footer: React.FC = () => {
+  const [footer, setFooter] = useState<FooterConfig | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const data = await getFooterData();
+        if (data) {
+          setFooter(data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch footer data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   const textColor = "text-green-50/80";
   const hoverColor = "hover:text-white";
 
@@ -15,29 +42,68 @@ export const Footer: React.FC = () => {
 
   const iconStyle = "w-4 h-4 text-green-400 group-hover:text-white transition-colors mt-0.5 flex-shrink-0";
 
+  if (isLoading) {
+    return (
+      <footer className="bg-green-950 py-10 border-t border-green-900">
+        <div className="container mx-auto px-4 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8 lg:gap-12">
+            <div className="hidden md:block lg:col-span-2">
+              <div className="h-5 w-32 bg-green-900 rounded animate-pulse mb-6" />
+              <div className="space-y-4">
+                <div className="h-4 w-3/4 bg-green-900/50 rounded animate-pulse" />
+                <div className="h-4 w-1/2 bg-green-900/50 rounded animate-pulse" />
+                <div className="h-4 w-2/3 bg-green-900/50 rounded animate-pulse" />
+              </div>
+            </div>
+            <div className="hidden md:block">
+              <div className="h-5 w-24 bg-green-900 rounded animate-pulse mb-6" />
+              <div className="space-y-4">
+                {[1, 2, 3, 4].map((idx) => (
+                  <div key={idx} className="h-4 w-full bg-green-900/50 rounded animate-pulse" />
+                ))}
+              </div>
+            </div>
+            <div>
+              <div className="h-5 w-40 bg-green-900 rounded animate-pulse mb-6" />
+              <div className="flex gap-4">
+                {[1, 2, 3].map((idx) => (
+                  <div key={idx} className="w-11 h-11 rounded-full bg-green-900 animate-pulse" />
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </footer>
+    );
+  }
+
+  if (!footer) {
+    return null;
+  }
+
   return (
-    <footer className="bg-green-950 pt-16 pb-8 border-t border-green-900">
+    <footer className="bg-green-950 py-10 border-t border-green-900">
       <div className="container mx-auto px-4 lg:px-8">
 
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8 lg:gap-12 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8 lg:gap-12">
 
           <div className="hidden md:block lg:col-span-2">
              <h4 className={headerStyle}>Thông tin công ty</h4>
              <ul className="space-y-4">
                 <li className={`flex items-start gap-3 text-sm ${textColor} leading-relaxed`}>
                    <ChevronRight className={iconStyle} aria-hidden="true" />
-                   <span>Số 123, Đường Nguyễn Văn Linh, Quận 7, TP. Hồ Chí Minh</span>
+                   <span>{footer.address}</span>
                 </li>
                 <li>
-                   <a href="tel:1900636340" className={itemStyle}>
+                   <a href={`tel:${footer.phone.replace(/\s/g, '')}`} className={itemStyle}>
                       <ChevronRight className={iconStyle} aria-hidden="true" />
-                      <span className="font-medium tracking-wide">1900 6363 40</span>
+                      <span className="font-medium tracking-wide">{footer.phone}</span>
                    </a>
                 </li>
                 <li>
-                   <a href="mailto:contact@esat.vn" className={itemStyle}>
+                   <a href={`mailto:${footer.email}`} className={itemStyle}>
                       <ChevronRight className={iconStyle} aria-hidden="true" />
-                      <span>contact@esat.vn</span>
+                      <span>{footer.email}</span>
                    </a>
                 </li>
              </ul>
@@ -46,11 +112,11 @@ export const Footer: React.FC = () => {
           <div className="hidden md:block">
             <h4 className={headerStyle}>Chính sách</h4>
             <ul className="space-y-4">
-              {['Chính sách & Điều khoản', 'Chính sách đổi trả', 'Chính sách vận chuyển', 'Bảo mật & Quyền riêng tư'].map((item, idx) => (
+              {(footer.policies || []).map((policy, idx) => (
                 <li key={idx}>
-                  <a href="#" className={itemStyle}>
+                  <a href={policy.link || '#'} className={itemStyle}>
                     <ChevronRight className={iconStyle} aria-hidden="true" />
-                    {item}
+                    {policy.label}
                   </a>
                 </li>
               ))}
@@ -62,7 +128,7 @@ export const Footer: React.FC = () => {
 
              <div className="flex gap-4">
                 <a
-                  href="#"
+                  href={getSocialUrl(footer.social_links, 'facebook')}
                   target="_blank"
                   rel="noopener noreferrer"
                   className={`w-11 h-11 rounded-full bg-green-900 border border-green-800 flex items-center justify-center text-green-100 hover:bg-[#1877F2] hover:border-[#1877F2] hover:text-white transition-all duration-300 group ${linkFocusStyle}`}
@@ -72,7 +138,7 @@ export const Footer: React.FC = () => {
                 </a>
 
                 <a
-                  href="#"
+                  href={getSocialUrl(footer.social_links, 'messenger')}
                   target="_blank"
                   rel="noopener noreferrer"
                   className={`w-11 h-11 rounded-full bg-green-900 border border-green-800 flex items-center justify-center text-green-100 hover:bg-[#00B2FF] hover:border-[#00B2FF] hover:text-white transition-all duration-300 group ${linkFocusStyle}`}
@@ -84,7 +150,7 @@ export const Footer: React.FC = () => {
                 </a>
 
                 <a
-                  href="#"
+                  href={getSocialUrl(footer.social_links, 'zalo')}
                   target="_blank"
                   rel="noopener noreferrer"
                   className={`w-11 h-11 rounded-full bg-green-900 border border-green-800 flex items-center justify-center text-green-100 hover:bg-[#0068FF] hover:border-[#0068FF] hover:text-white transition-all duration-300 group ${linkFocusStyle}`}
@@ -98,13 +164,7 @@ export const Footer: React.FC = () => {
           </div>
         </div>
 
-        <div className="border-t border-green-900 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-green-200/50">
-           <p>&copy; {new Date().getFullYear()} Công Ty TNHH ESAT. Bảo lưu mọi quyền.</p>
-           <div className="flex gap-6">
-              <a href="#" className="hover:text-white transition-colors">Điều khoản sử dụng</a>
-              <a href="#" className="hover:text-white transition-colors">Chính sách bảo mật</a>
-           </div>
-        </div>
+
       </div>
     </footer>
   );

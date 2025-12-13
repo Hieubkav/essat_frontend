@@ -5,12 +5,20 @@ import { Menu, X, Phone, ChevronDown, Home, Search, Mail } from 'lucide-react';
 import { Logo } from './Logo';
 import { NAV_LINKS } from './constants';
 import { SearchModal } from './SearchModal';
+import { getFooterData, FooterConfig } from '@/lib/homeApi';
+
+// Fallback contact info
+const DEFAULT_CONTACT = {
+  phone: '1900 6363 40',
+  email: 'contact@esat.vn',
+};
 
 export const Header: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [mobileSubmenuOpen, setMobileSubmenuOpen] = useState<string | null>(null);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [contactInfo, setContactInfo] = useState(DEFAULT_CONTACT);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -18,6 +26,24 @@ export const Header: React.FC = () => {
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const fetchContactInfo = async () => {
+      try {
+        const data = await getFooterData();
+        if (data) {
+          setContactInfo({
+            phone: data.phone || DEFAULT_CONTACT.phone,
+            email: data.email || DEFAULT_CONTACT.email,
+          });
+        }
+      } catch (error) {
+        console.error('Failed to fetch contact info:', error);
+      }
+    };
+
+    fetchContactInfo();
   }, []);
 
   const toggleMobileSubmenu = (label: string) => {
@@ -41,7 +67,7 @@ export const Header: React.FC = () => {
               </div>
               <div>
                 <p className="text-slate-500 text-xs">Hotline ho tro</p>
-                <p className="font-bold text-slate-800">1900 6363 40</p>
+                <p className="font-bold text-slate-800">{contactInfo.phone}</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -50,7 +76,7 @@ export const Header: React.FC = () => {
               </div>
               <div>
                 <p className="text-slate-500 text-xs">Email lien he</p>
-                <p className="font-bold text-slate-800">contact@esat.vn</p>
+                <p className="font-bold text-slate-800">{contactInfo.email}</p>
               </div>
             </div>
           </div>
@@ -162,10 +188,10 @@ export const Header: React.FC = () => {
               <p className="text-xs font-bold text-slate-400 uppercase mb-3">Thong tin lien he</p>
               <div className="space-y-3">
                 <div className="flex items-center gap-3 text-sm text-slate-600">
-                  <Phone size={16} className="text-primary" /> 1900 6363 40
+                  <Phone size={16} className="text-primary" /> {contactInfo.phone}
                 </div>
                 <div className="flex items-center gap-3 text-sm text-slate-600">
-                  <Mail size={16} className="text-secondary" /> contact@esat.vn
+                  <Mail size={16} className="text-secondary" /> {contactInfo.email}
                 </div>
               </div>
             </div>
