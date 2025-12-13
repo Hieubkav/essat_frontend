@@ -1,9 +1,12 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
-import { X, Search, Box, FileText, ArrowRight, ChevronRight } from 'lucide-react';
-import { PRODUCTS, NEWS } from './constants';
-import { Product, NewsItem } from './types';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { X, Search, Box, FileText, ArrowRight, ChevronRight, Loader2 } from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { Product, Post, getProducts, getPosts } from '@/lib/contentApi';
+import { useHomeData } from './HomeDataProvider';
+import { getImageUrl } from '@/lib/utils';
 
 interface SearchModalProps {
   isOpen: boolean;
@@ -13,8 +16,46 @@ interface SearchModalProps {
 export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
   const [query, setQuery] = useState('');
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
-  const [filteredNews, setFilteredNews] = useState<NewsItem[]>([]);
+  const [filteredPosts, setFilteredPosts] = useState<Post[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const debounceRef = useRef<NodeJS.Timeout | null>(null);
+  const { settings } = useHomeData();
+
+  const searchContent = useCallback(async (searchQuery: string) => {
+    if (!searchQuery.trim()) {
+      setFilteredProducts([]);
+      setFilteredPosts([]);
+      return;
+    }
+
+    setIsSearching(true);
+    try {
+      const [productsRes, postsRes] = await Promise.all([
+        getProducts({ per_page: 20 }),
+        getPosts({ per_page: 20 }),
+      ]);
+
+      const lowerQuery = searchQuery.toLowerCase();
+
+      const matchedProducts = productsRes.products.filter(
+        (p) =>
+          p.name.toLowerCase().includes(lowerQuery) ||
+          p.description?.toLowerCase().includes(lowerQuery)
+      );
+
+      const matchedPosts = postsRes.posts.filter(
+        (p) => p.title.toLowerCase().includes(lowerQuery)
+      );
+
+      setFilteredProducts(matchedProducts.slice(0, 5));
+      setFilteredPosts(matchedPosts.slice(0, 5));
+    } catch (error) {
+      console.error('Search error:', error);
+    } finally {
+      setIsSearching(false);
+    }
+  }, []);
 
   useEffect(() => {
     if (isOpen) {
@@ -24,6 +65,8 @@ export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => 
       document.body.style.overflow = 'hidden';
     } else {
       setQuery('');
+      setFilteredProducts([]);
+      setFilteredPosts([]);
       document.body.style.overflow = 'unset';
     }
     return () => {
@@ -40,27 +83,32 @@ export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => 
   }, [onClose]);
 
   useEffect(() => {
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+    }
+
     if (!query.trim()) {
       setFilteredProducts([]);
-      setFilteredNews([]);
+      setFilteredPosts([]);
       return;
     }
 
-    const lowerQuery = query.toLowerCase();
+    debounceRef.current = setTimeout(() => {
+      searchContent(query);
+    }, 300);
 
-    const fProducts = PRODUCTS.filter(p =>
-      p.name.toLowerCase().includes(lowerQuery) ||
-      p.category.toLowerCase().includes(lowerQuery)
-    );
+    return () => {
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+      }
+    };
+  }, [query, searchContent]);
 
-    const fNews = NEWS.filter(n =>
-      n.title.toLowerCase().includes(lowerQuery) ||
-      n.excerpt.toLowerCase().includes(lowerQuery)
-    );
-
-    setFilteredProducts(fProducts);
-    setFilteredNews(fNews);
-  }, [query]);
+  const formatPrice = (price: string) => {
+    const num = parseFloat(price);
+    if (isNaN(num)) return price;
+    return num.toLocaleString('vi-VN') + 'đ';
+  };
 
   if (!isOpen) return null;
 
@@ -97,79 +145,143 @@ export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => 
             </div>
           )}
 
-          {query && filteredProducts.length === 0 && filteredNews.length === 0 && (
+          {isSearching && (
+            <div className="py-10 text-center">
+              <Loader2 className="h-6 w-6 animate-spin mx-auto text-primary" />
+              <p className="text-sm text-slate-500 mt-2">Đang tìm kiếm...</p>
+            </div>
+          )}
+
+          {!isSearching && query && filteredProducts.length === 0 && filteredPosts.length === 0 && (
             <div className="py-10 text-center text-slate-500">
               <p>Không tìm thấy kết quả nào cho &quot;{query}&quot;.</p>
             </div>
           )}
 
-          {filteredProducts.length > 0 && (
+          {!isSearching && filteredProducts.length > 0 && (
             <div className="mb-6">
               <h3 className="flex items-center text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3 px-2">
                 <Box className="mr-2 h-3 w-3" /> Sản phẩm
               </h3>
               <div className="space-y-2">
                 {filteredProducts.map(product => (
-                  <div
+                  <Link
                     key={product.id}
+                    href={`/san-pham/${product.slug}`}
+                    onClick={onClose}
                     className="group flex items-center gap-4 p-2 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors"
                   >
-                    <div className="h-12 w-12 rounded-md overflow-hidden bg-slate-100 flex-shrink-0 border border-slate-200">
-                      <img src={product.image} alt={product.name} className="h-full w-full object-cover" />
+                    <div className="h-12 w-12 rounded-md overflow-hidden bg-slate-100 flex-shrink-0 border border-slate-200 relative">
+                      {getImageUrl(product.thumbnail) ? (
+                        <Image
+                          src={getImageUrl(product.thumbnail)!}
+                          alt={product.name}
+                          fill
+                          className="object-cover"
+                        />
+                      ) : getImageUrl(settings?.placeholder) ? (
+                        <Image
+                          src={getImageUrl(settings?.placeholder)!}
+                          alt="Placeholder"
+                          fill
+                          className="object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-slate-200" />
+                      )}
                     </div>
                     <div className="flex-1 min-w-0">
                       <h4 className="text-sm font-medium text-slate-900 truncate group-hover:text-primary transition-colors">
                         {product.name}
                       </h4>
-                      <p className="text-xs text-slate-500">{product.category}</p>
+                      {product.description && (
+                        <p className="text-xs text-slate-500 truncate">{product.description}</p>
+                      )}
                     </div>
                     <div className="text-right">
-                      <p className="text-sm font-bold text-slate-900">
-                        {product.price.toLocaleString('vi-VN')}d
+                      <p className="text-sm font-bold text-primary">
+                        {formatPrice(product.price)}
                       </p>
                     </div>
                     <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-slate-500" />
-                  </div>
+                  </Link>
                 ))}
               </div>
             </div>
           )}
 
-          {filteredNews.length > 0 && (
+          {!isSearching && filteredPosts.length > 0 && (
             <div>
-              <div className="border-t border-slate-100 my-4"></div>
+              {filteredProducts.length > 0 && (
+                <div className="border-t border-slate-100 my-4"></div>
+              )}
               <h3 className="flex items-center text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3 px-2">
-                <FileText className="mr-2 h-3 w-3" /> Tin tức
+                <FileText className="mr-2 h-3 w-3" /> Bài viết
               </h3>
               <div className="space-y-2">
-                {filteredNews.map(news => (
-                  <div
-                    key={news.id}
-                    className="group flex items-start gap-3 p-2 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors"
+                {filteredPosts.map(post => (
+                  <Link
+                    key={post.id}
+                    href={`/bai-viet/${post.slug}`}
+                    onClick={onClose}
+                    className="group flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors"
                   >
-                    <div className="mt-1">
-                      <FileText className="h-4 w-4 text-slate-400" />
+                    <div className="h-12 w-12 rounded-md overflow-hidden bg-slate-100 flex-shrink-0 border border-slate-200 relative">
+                      {getImageUrl(post.thumbnail) ? (
+                        <Image
+                          src={getImageUrl(post.thumbnail)!}
+                          alt={post.title}
+                          fill
+                          className="object-cover"
+                        />
+                      ) : getImageUrl(settings?.placeholder) ? (
+                        <Image
+                          src={getImageUrl(settings?.placeholder)!}
+                          alt="Placeholder"
+                          fill
+                          className="object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-slate-200 flex items-center justify-center">
+                          <FileText className="h-4 w-4 text-slate-400" />
+                        </div>
+                      )}
                     </div>
-                    <div className="flex-1">
-                      <h4 className="text-sm font-medium text-slate-900 group-hover:text-primary transition-colors">
-                        {news.title}
+                    <div className="flex-1 min-w-0">
+                      <h4 className="text-sm font-medium text-slate-900 group-hover:text-primary transition-colors truncate">
+                        {post.title}
                       </h4>
-                      <p className="text-xs text-slate-500 line-clamp-1 mt-0.5">{news.excerpt}</p>
+                      {post.category && (
+                        <p className="text-xs text-slate-500">{post.category.name}</p>
+                      )}
                     </div>
-                    <span className="text-[10px] text-slate-400 whitespace-nowrap bg-slate-100 px-2 py-0.5 rounded">
-                      {news.date}
-                    </span>
-                  </div>
+                    <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-slate-500" />
+                  </Link>
                 ))}
               </div>
             </div>
           )}
 
-          {query && (filteredProducts.length > 0 || filteredNews.length > 0) && (
-            <div className="mt-4 pt-4 border-t border-slate-100 text-center">
-              <button className="text-sm text-primary font-medium hover:underline inline-flex items-center">
-                Xem tất cả kết quả <ArrowRight className="ml-1 h-3 w-3" />
-              </button>
+          {!isSearching && query && (filteredProducts.length > 0 || filteredPosts.length > 0) && (
+            <div className="mt-4 pt-4 border-t border-slate-100 flex justify-center gap-4">
+              {filteredProducts.length > 0 && (
+                <Link
+                  href="/san-pham"
+                  onClick={onClose}
+                  className="text-sm text-primary font-medium hover:underline inline-flex items-center"
+                >
+                  Xem tất cả sản phẩm <ArrowRight className="ml-1 h-3 w-3" />
+                </Link>
+              )}
+              {filteredPosts.length > 0 && (
+                <Link
+                  href="/bai-viet"
+                  onClick={onClose}
+                  className="text-sm text-primary font-medium hover:underline inline-flex items-center"
+                >
+                  Xem tất cả bài viết <ArrowRight className="ml-1 h-3 w-3" />
+                </Link>
+              )}
             </div>
           )}
         </div>

@@ -1,22 +1,29 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 export const InitialLoadingScreen = () => {
+  const [isVisible, setIsVisible] = useState(true);
+  const [isFadingOut, setIsFadingOut] = useState(false);
+
   useEffect(() => {
-    const loadingScreen = document.getElementById('initial-loading-screen');
-    if (loadingScreen) {
-      // Small delay to ensure smooth transition after hydration
-      requestAnimationFrame(() => {
-        loadingScreen.classList.add('hidden');
-      });
-      
-      // Remove from DOM after animation completes
-      setTimeout(() => {
-        loadingScreen.remove();
-      }, 350);
-    }
+    const raf = requestAnimationFrame(() => setIsFadingOut(true));
+    const timeout = setTimeout(() => setIsVisible(false), 350);
+
+    return () => {
+      cancelAnimationFrame(raf);
+      clearTimeout(timeout);
+    };
   }, []);
 
-  return null;
+  if (!isVisible) return null;
+
+  return (
+    <div
+      id="initial-loading-screen"
+      className={isFadingOut ? 'fade-out' : ''}
+    >
+      <div className="initial-spinner" />
+    </div>
+  );
 };

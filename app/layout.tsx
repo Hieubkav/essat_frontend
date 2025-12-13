@@ -24,7 +24,7 @@ export default function RootLayout({
             background: #ffffff;
             transition: opacity 0.3s ease-out, visibility 0.3s ease-out;
           }
-          #initial-loading-screen.hidden {
+          #initial-loading-screen.fade-out {
             opacity: 0;
             visibility: hidden;
           }
@@ -42,16 +42,12 @@ export default function RootLayout({
         ` }} />
       </head>
       <body className="antialiased">
-        {/* Initial loading screen - shows immediately from HTML */}
-        <div id="initial-loading-screen">
-          <div className="initial-spinner" />
-        </div>
-        
+        <InitialLoadingScreen />
+
         <QueryProvider>
           <SettingsProvider>
             <AuthProvider>
               {children}
-              <InitialLoadingScreen />
             </AuthProvider>
           </SettingsProvider>
         </QueryProvider>
