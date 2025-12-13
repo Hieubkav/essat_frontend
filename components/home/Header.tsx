@@ -10,17 +10,13 @@ import Image from 'next/image';
 // Menu tĩnh Trang chủ luôn hiển thị đầu tiên
 const HOME_MENU: MenuItem = { label: 'Trang chủ', href: '/' };
 
-// Fallback logo component
-const FallbackLogo: React.FC<{ siteName?: string | null }> = ({ siteName }) => (
-  <div className="bg-primary px-6 py-2 rounded-full border-4 border-white ring-4 ring-secondary shadow-lg">
-    <span className="text-white font-serif font-bold text-2xl tracking-widest drop-shadow-md">
-      {siteName || 'ESAT'}
-    </span>
-  </div>
+// Skeleton logo component
+const LogoSkeleton: React.FC = () => (
+  <div className="h-12 w-[150px] bg-slate-200 rounded animate-pulse" />
 );
 
 export const Header: React.FC = () => {
-  const { settings, menus } = useHomeData();
+  const { settings, menus, isLoading } = useHomeData();
   
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -54,7 +50,9 @@ export const Header: React.FC = () => {
       <div className="bg-white border-b border-slate-100 py-3 hidden lg:block">
         <div className="container mx-auto px-4 flex items-center justify-between">
           <a href="/" className="flex-shrink-0 transform scale-90 origin-left">
-            {settings?.logo ? (
+            {isLoading ? (
+              <LogoSkeleton />
+            ) : settings?.logo ? (
               <Image
                 src={settings.logo}
                 alt={settings.site_name || 'Logo'}
@@ -63,9 +61,7 @@ export const Header: React.FC = () => {
                 className="h-12 w-auto object-contain"
                 priority
               />
-            ) : (
-              <FallbackLogo siteName={settings?.site_name} />
-            )}
+            ) : null}
           </a>
 
           <div className="flex items-center gap-8 text-sm">

@@ -3,7 +3,8 @@
 import React, { createContext, useContext, ReactNode } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { 
-  getHomePageData, 
+  getHomePageData,
+  HomePageData,
   SettingsConfig,
   MenuItem,
   HeroConfig,
@@ -48,18 +49,20 @@ export const useHomeData = () => useContext(HomeDataContext);
 
 interface HomeDataProviderProps {
   children: ReactNode;
+  initialData?: HomePageData | null;
 }
 
-export const HomeDataProvider: React.FC<HomeDataProviderProps> = ({ children }) => {
+export const HomeDataProvider: React.FC<HomeDataProviderProps> = ({ children, initialData }) => {
   const { data, isLoading } = useQuery({
     queryKey: ['home-page-data'],
     queryFn: getHomePageData,
-    staleTime: 5 * 60 * 1000, // 5 phút - data được coi là fresh
-    gcTime: 10 * 60 * 1000, // 10 phút - giữ cache trong memory
+    initialData: initialData ?? undefined,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
 
   const value: HomeDataContextType = {
-    isLoading,
+    isLoading: initialData ? false : isLoading,
     settings: data?.settings ?? null,
     menus: data?.menus ?? [],
     hero: data?.components?.hero_carousel ?? null,
