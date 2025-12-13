@@ -1,11 +1,6 @@
-import type { Metadata } from "next";
 import "./globals.css";
 import { AuthProvider } from "./context/AuthContext";
-
-export const metadata: Metadata = {
-  title: "ZenDashboard",
-  description: "ZenDashboard website and admin portal",
-};
+import { SettingsProvider } from "@/components/SettingsProvider";
 
 export default function RootLayout({
   children,
@@ -15,9 +10,11 @@ export default function RootLayout({
   return (
     <html lang="vi">
       <body className="antialiased">
-        <AuthProvider>
-          {children}
-        </AuthProvider>
+        <SettingsProvider>
+          <AuthProvider>
+            {children}
+          </AuthProvider>
+        </SettingsProvider>
       </body>
     </html>
   );

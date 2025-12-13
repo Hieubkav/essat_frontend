@@ -2,25 +2,28 @@
 
 import React, { useState, useEffect } from 'react';
 import { Menu, X, Phone, ChevronDown, Home, Search, Mail } from 'lucide-react';
-import { Logo } from './Logo';
 import { SearchModal } from './SearchModal';
-import { getFooterData, getMenusData, MenuItem } from '@/lib/homeApi';
-
-// Fallback contact info
-const DEFAULT_CONTACT = {
-  phone: '1900 6363 40',
-  email: 'contact@esat.vn',
-};
+import { getSettingsData, getMenusData, MenuItem, SettingsConfig } from '@/lib/homeApi';
+import Image from 'next/image';
 
 // Menu tĩnh Trang chủ luôn hiển thị đầu tiên
 const HOME_MENU: MenuItem = { label: 'Trang chủ', href: '/' };
+
+// Fallback logo component
+const FallbackLogo: React.FC<{ siteName?: string | null }> = ({ siteName }) => (
+  <div className="bg-primary px-6 py-2 rounded-full border-4 border-white ring-4 ring-secondary shadow-lg">
+    <span className="text-white font-serif font-bold text-2xl tracking-widest drop-shadow-md">
+      {siteName || 'ESAT'}
+    </span>
+  </div>
+);
 
 export const Header: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [mobileSubmenuOpen, setMobileSubmenuOpen] = useState<string | null>(null);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [contactInfo, setContactInfo] = useState(DEFAULT_CONTACT);
+  const [settings, setSettings] = useState<SettingsConfig | null>(null);
   const [navLinks, setNavLinks] = useState<MenuItem[]>([HOME_MENU]);
 
   useEffect(() => {
@@ -34,16 +37,13 @@ export const Header: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [footerData, menusData] = await Promise.all([
-          getFooterData(),
+        const [settingsData, menusData] = await Promise.all([
+          getSettingsData(),
           getMenusData(),
         ]);
 
-        if (footerData) {
-          setContactInfo({
-            phone: footerData.phone || DEFAULT_CONTACT.phone,
-            email: footerData.email || DEFAULT_CONTACT.email,
-          });
+        if (settingsData) {
+          setSettings(settingsData);
         }
 
         // Lọc bỏ menu Trang chủ từ API (nếu có) vì đã có HOME_MENU cứng
@@ -70,28 +70,43 @@ export const Header: React.FC = () => {
       <div className="bg-white border-b border-slate-100 py-3 hidden lg:block">
         <div className="container mx-auto px-4 flex items-center justify-between">
           <a href="/" className="flex-shrink-0 transform scale-90 origin-left">
-            <Logo />
+            {settings?.logo ? (
+              <Image
+                src={settings.logo}
+                alt={settings.site_name || 'Logo'}
+                width={150}
+                height={60}
+                className="h-12 w-auto object-contain"
+                priority
+              />
+            ) : (
+              <FallbackLogo siteName={settings?.site_name} />
+            )}
           </a>
 
           <div className="flex items-center gap-8 text-sm">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                <Phone size={16} />
+            {settings?.phone && (
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                  <Phone size={16} />
+                </div>
+                <div>
+                  <p className="text-slate-500 text-xs">Hotline hỗ trợ</p>
+                  <p className="font-bold text-slate-800">{settings.phone}</p>
+                </div>
               </div>
-              <div>
-                <p className="text-slate-500 text-xs">Hotline ho tro</p>
-                <p className="font-bold text-slate-800">{contactInfo.phone}</p>
+            )}
+            {settings?.email && (
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-secondary/10 flex items-center justify-center text-secondary">
+                  <Mail size={16} />
+                </div>
+                <div>
+                  <p className="text-slate-500 text-xs">Email liên hệ</p>
+                  <p className="font-bold text-slate-800">{settings.email}</p>
+                </div>
               </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-secondary/10 flex items-center justify-center text-secondary">
-                <Mail size={16} />
-              </div>
-              <div>
-                <p className="text-slate-500 text-xs">Email lien he</p>
-                <p className="font-bold text-slate-800">{contactInfo.email}</p>
-              </div>
-            </div>
+            )}
           </div>
         </div>
       </div>
@@ -141,7 +156,7 @@ export const Header: React.FC = () => {
               <button
                 onClick={() => setIsSearchOpen(true)}
                 className="p-2 hover:bg-white/10 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-white/20"
-                aria-label="Tim kiem"
+                aria-label="Tìm kiếm"
               >
                 <Search size={20} />
               </button>
@@ -197,17 +212,23 @@ export const Header: React.FC = () => {
               ))}
             </ul>
 
-            <div className="p-5 mt-4 bg-slate-50 mx-4 rounded-lg">
-              <p className="text-xs font-bold text-slate-400 uppercase mb-3">Thong tin lien he</p>
-              <div className="space-y-3">
-                <div className="flex items-center gap-3 text-sm text-slate-600">
-                  <Phone size={16} className="text-primary" /> {contactInfo.phone}
-                </div>
-                <div className="flex items-center gap-3 text-sm text-slate-600">
-                  <Mail size={16} className="text-secondary" /> {contactInfo.email}
+            {(settings?.phone || settings?.email) && (
+              <div className="p-5 mt-4 bg-slate-50 mx-4 rounded-lg">
+                <p className="text-xs font-bold text-slate-400 uppercase mb-3">Thông tin liên hệ</p>
+                <div className="space-y-3">
+                  {settings?.phone && (
+                    <div className="flex items-center gap-3 text-sm text-slate-600">
+                      <Phone size={16} className="text-primary" /> {settings.phone}
+                    </div>
+                  )}
+                  {settings?.email && (
+                    <div className="flex items-center gap-3 text-sm text-slate-600">
+                      <Mail size={16} className="text-secondary" /> {settings.email}
+                    </div>
+                  )}
                 </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </header>

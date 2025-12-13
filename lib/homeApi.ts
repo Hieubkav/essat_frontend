@@ -1,5 +1,35 @@
 import api from './api';
 
+// Types cho Settings API
+export interface SettingsConfig {
+  site_name: string | null;
+  primary_color: string | null;
+  secondary_color: string | null;
+  seo_title: string | null;
+  seo_description: string | null;
+  phone: string | null;
+  address: string | null;
+  email: string | null;
+  logo: string | null;
+  favicon: string | null;
+  placeholder: string | null;
+  updated_at: string | null;
+}
+
+export interface SettingsResponse {
+  success: boolean;
+  data: SettingsConfig;
+}
+
+export async function getSettingsData(): Promise<SettingsConfig | null> {
+  try {
+    const response = await api.get<SettingsResponse>('/settings');
+    return response.data.data;
+  } catch {
+    return null;
+  }
+}
+
 // Types cho Home Components từ API
 export interface HeroSlide {
   image: string;
