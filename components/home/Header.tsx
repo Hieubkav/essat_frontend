@@ -49,7 +49,7 @@ export const Header: React.FC = () => {
 
       <div className="bg-white border-b border-slate-100 py-3 hidden lg:block">
         <div className="container mx-auto px-4 flex items-center justify-between">
-          <a href="/" className="flex-shrink-0 transform scale-90 origin-left">
+          <a href="/" className="flex-shrink-0">
             {isLoading ? (
               <LogoSkeleton />
             ) : settings?.logo ? (
@@ -94,9 +94,19 @@ export const Header: React.FC = () => {
       <header className={`sticky top-0 z-50 w-full transition-all duration-300 shadow-lg ${isScrolled ? 'py-0' : 'py-0'} bg-primary`}>
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-14 md:h-16">
-            <div className="lg:hidden">
-              <span className="text-white font-bold text-xl tracking-widest border-2 border-white px-3 py-1 rounded">ESAT</span>
-            </div>
+            <a href="/" className="lg:hidden flex-shrink-0">
+              {isLoading ? (
+                <div className="h-8 w-[100px] bg-white/20 rounded animate-pulse" />
+              ) : settings?.logo ? (
+                <Image
+                  src={settings.logo}
+                  alt={settings.site_name || 'Logo'}
+                  width={120}
+                  height={48}
+                  className="h-8 w-auto object-contain "
+                />
+              ) : null}
+            </a>
 
             <nav className="hidden lg:flex items-center h-full">
               <ul className="flex items-center h-full">
@@ -154,7 +164,19 @@ export const Header: React.FC = () => {
 
         <div className={`lg:hidden fixed top-0 left-0 bottom-0 w-[80%] max-w-sm bg-white z-50 shadow-2xl transition-transform duration-300 transform ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
           <div className="p-4 bg-primary text-white flex justify-between items-center">
-            <span className="font-bold text-lg">MENU</span>
+            {isLoading ? (
+              <div className="h-8 w-[100px] bg-white/20 rounded animate-pulse" />
+            ) : settings?.logo ? (
+              <Image
+                src={settings.logo}
+                alt={settings.site_name || 'Logo'}
+                width={100}
+                height={40}
+                className="h-8 w-auto object-contain"
+              />
+            ) : (
+              <span className="font-bold text-lg">MENU</span>
+            )}
             <button onClick={() => setIsMobileMenuOpen(false)}><X size={24} /></button>
           </div>
 

@@ -92,7 +92,7 @@ export const Footer: React.FC = () => {
              </ul>
           </div>
 
-          <div className="hidden md:block">
+          <div>
             <h4 className={headerStyle}>Chính sách</h4>
             <ul className="space-y-4">
               {(footer.policies || []).map((policy, idx) => (
