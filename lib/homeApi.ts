@@ -195,3 +195,29 @@ export async function getFooterData(): Promise<FooterConfig | null> {
   const component = await getHomeComponentByType<FooterConfig>('footer');
   return component?.config ?? null;
 }
+
+// Menu types
+export interface MenuChild {
+  label: string;
+  href: string;
+}
+
+export interface MenuItem {
+  label: string;
+  href: string;
+  children?: MenuChild[];
+}
+
+export interface MenusResponse {
+  success: boolean;
+  data: MenuItem[];
+}
+
+export async function getMenusData(): Promise<MenuItem[]> {
+  try {
+    const response = await api.get<MenusResponse>('/menus');
+    return response.data.data;
+  } catch {
+    return [];
+  }
+}

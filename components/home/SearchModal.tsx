@@ -77,7 +77,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => 
           <input
             ref={inputRef}
             className="flex-1 bg-transparent text-lg outline-none placeholder:text-slate-400 text-slate-900"
-            placeholder="Tim kiem san pham, tin tuc..."
+            placeholder="Tìm kiếm sản phẩm, tin tức..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
@@ -93,20 +93,20 @@ export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => 
         <div className="max-h-[60vh] overflow-y-auto p-4 custom-scrollbar">
           {!query && (
             <div className="py-10 text-center text-sm text-slate-500">
-              <p>Nhap tu khoa de tim kiem san pham hoac bai viet.</p>
+              <p>Nhập từ khóa để tìm kiếm sản phẩm hoặc bài viết.</p>
             </div>
           )}
 
           {query && filteredProducts.length === 0 && filteredNews.length === 0 && (
             <div className="py-10 text-center text-slate-500">
-              <p>Khong tim thay ket qua nao cho &quot;{query}&quot;.</p>
+              <p>Không tìm thấy kết quả nào cho &quot;{query}&quot;.</p>
             </div>
           )}
 
           {filteredProducts.length > 0 && (
             <div className="mb-6">
               <h3 className="flex items-center text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3 px-2">
-                <Box className="mr-2 h-3 w-3" /> San pham
+                <Box className="mr-2 h-3 w-3" /> Sản phẩm
               </h3>
               <div className="space-y-2">
                 {filteredProducts.map(product => (
@@ -139,7 +139,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => 
             <div>
               <div className="border-t border-slate-100 my-4"></div>
               <h3 className="flex items-center text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3 px-2">
-                <FileText className="mr-2 h-3 w-3" /> Tin tuc
+                <FileText className="mr-2 h-3 w-3" /> Tin tức
               </h3>
               <div className="space-y-2">
                 {filteredNews.map(news => (
@@ -168,7 +168,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => 
           {query && (filteredProducts.length > 0 || filteredNews.length > 0) && (
             <div className="mt-4 pt-4 border-t border-slate-100 text-center">
               <button className="text-sm text-primary font-medium hover:underline inline-flex items-center">
-                Xem tat ca ket qua <ArrowRight className="ml-1 h-3 w-3" />
+                Xem tất cả kết quả <ArrowRight className="ml-1 h-3 w-3" />
               </button>
             </div>
           )}

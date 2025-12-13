@@ -3,9 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { Menu, X, Phone, ChevronDown, Home, Search, Mail } from 'lucide-react';
 import { Logo } from './Logo';
-import { NAV_LINKS } from './constants';
 import { SearchModal } from './SearchModal';
-import { getFooterData, FooterConfig } from '@/lib/homeApi';
+import { getFooterData, getMenusData, MenuItem } from '@/lib/homeApi';
 
 // Fallback contact info
 const DEFAULT_CONTACT = {
@@ -13,12 +12,16 @@ const DEFAULT_CONTACT = {
   email: 'contact@esat.vn',
 };
 
+// Menu tĩnh Trang chủ luôn hiển thị đầu tiên
+const HOME_MENU: MenuItem = { label: 'Trang chủ', href: '/' };
+
 export const Header: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [mobileSubmenuOpen, setMobileSubmenuOpen] = useState<string | null>(null);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [contactInfo, setContactInfo] = useState(DEFAULT_CONTACT);
+  const [navLinks, setNavLinks] = useState<MenuItem[]>([HOME_MENU]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -29,21 +32,31 @@ export const Header: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    const fetchContactInfo = async () => {
+    const fetchData = async () => {
       try {
-        const data = await getFooterData();
-        if (data) {
+        const [footerData, menusData] = await Promise.all([
+          getFooterData(),
+          getMenusData(),
+        ]);
+
+        if (footerData) {
           setContactInfo({
-            phone: data.phone || DEFAULT_CONTACT.phone,
-            email: data.email || DEFAULT_CONTACT.email,
+            phone: footerData.phone || DEFAULT_CONTACT.phone,
+            email: footerData.email || DEFAULT_CONTACT.email,
           });
         }
+
+        // Lọc bỏ menu Trang chủ từ API (nếu có) vì đã có HOME_MENU cứng
+        const filteredMenus = menusData.filter(
+          (menu) => menu.label.toLowerCase() !== 'trang chủ'
+        );
+        setNavLinks([HOME_MENU, ...filteredMenus]);
       } catch (error) {
-        console.error('Failed to fetch contact info:', error);
+        console.error('Failed to fetch header data:', error);
       }
     };
 
-    fetchContactInfo();
+    fetchData();
   }, []);
 
   const toggleMobileSubmenu = (label: string) => {
@@ -92,7 +105,7 @@ export const Header: React.FC = () => {
 
             <nav className="hidden lg:flex items-center h-full">
               <ul className="flex items-center h-full">
-                {NAV_LINKS.map((link) => (
+                {navLinks.map((link) => (
                   <li key={link.label} className="relative group h-full flex items-center">
                     <a
                       href={link.href}
@@ -152,7 +165,7 @@ export const Header: React.FC = () => {
 
           <div className="overflow-y-auto max-h-[calc(100vh-64px)]">
             <ul className="py-2">
-              {NAV_LINKS.map((link) => (
+              {navLinks.map((link) => (
                 <li key={link.label} className="border-b border-slate-100 last:border-0">
                   {link.children ? (
                     <div>
