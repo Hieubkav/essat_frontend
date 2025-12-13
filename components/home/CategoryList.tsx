@@ -1,12 +1,13 @@
 'use client';
 
 import React, { useRef, useState, useEffect, useCallback } from 'react';
+import Image from 'next/image';
 import { ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
-import { getProductCategoriesData, ProductCategoriesConfig, CategoryItem } from '@/lib/homeApi';
+import { useHomeData } from './HomeDataProvider';
+import { CategoryItem } from '@/lib/homeApi';
 
 export const CategoryList: React.FC = () => {
-  const [config, setConfig] = useState<ProductCategoriesConfig | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { categories: config, isLoading } = useHomeData();
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -39,23 +40,6 @@ export const CategoryList: React.FC = () => {
         behavior: 'smooth',
       });
     }
-  }, []);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const data = await getProductCategoriesData();
-        if (data) {
-          setConfig(data);
-        }
-      } catch (error) {
-        console.error('Failed to fetch categories data:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
   }, []);
 
   useEffect(() => {
@@ -137,11 +121,13 @@ export const CategoryList: React.FC = () => {
       `}
     >
       <div className="relative w-[72px] h-[72px] sm:w-36 sm:h-36 mb-2 sm:mb-4 rounded-xl overflow-hidden border border-slate-200 shadow-sm group-hover:border-primary group-hover:shadow-md transition-all duration-300 group-hover:-translate-y-1 bg-white">
-        <div className="absolute inset-0 bg-slate-100 animate-pulse" />
-        <img
-          src={cat.image}
+        <Image
+          src={cat.image || '/placeholder.png'}
           alt={cat.name}
-          className="relative w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+          fill
+          sizes="(max-width: 640px) 72px, 144px"
+          loading={index < 6 ? 'eager' : 'lazy'}
+          className="object-cover transition-transform duration-500 group-hover:scale-110"
           draggable={false}
         />
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300" />

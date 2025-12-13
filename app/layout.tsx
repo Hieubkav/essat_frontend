@@ -1,6 +1,7 @@
 import "./globals.css";
 import { AuthProvider } from "./context/AuthContext";
 import { SettingsProvider } from "@/components/SettingsProvider";
+import { QueryProvider } from "@/components/providers/QueryProvider";
 
 export default function RootLayout({
   children,
@@ -10,11 +11,13 @@ export default function RootLayout({
   return (
     <html lang="vi">
       <body className="antialiased">
-        <SettingsProvider>
-          <AuthProvider>
-            {children}
-          </AuthProvider>
-        </SettingsProvider>
+        <QueryProvider>
+          <SettingsProvider>
+            <AuthProvider>
+              {children}
+            </AuthProvider>
+          </SettingsProvider>
+        </QueryProvider>
       </body>
     </html>
   );

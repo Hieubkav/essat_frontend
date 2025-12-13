@@ -1,34 +1,19 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import Image from 'next/image';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { getHeroData, HeroSlide } from '@/lib/homeApi';
+import { useHomeData } from './HomeDataProvider';
 
 export const Hero: React.FC = () => {
-  const [banners, setBanners] = useState<HeroSlide[]>([]);
+  const { hero, isLoading } = useHomeData();
+  const banners = hero?.slides ?? [];
+  
   const [current, setCurrent] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
 
   const touchStartX = useRef<number | null>(null);
   const touchEndX = useRef<number | null>(null);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const data = await getHeroData();
-        if (data?.slides && data.slides.length > 0) {
-          setBanners(data.slides);
-        }
-      } catch (error) {
-        console.error('Failed to fetch hero data:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
 
   const length = banners.length;
 
@@ -108,10 +93,13 @@ export const Hero: React.FC = () => {
             />
 
             <div className="relative w-full h-full flex items-center justify-center p-0 md:p-4">
-              <img
+              <Image
                 src={banner.image}
-                alt={banner.alt}
-                className="max-w-full max-h-full w-auto h-auto object-contain shadow-2xl rounded-sm pointer-events-none"
+                alt={banner.alt || `Banner ${index + 1}`}
+                fill
+                sizes="100vw"
+                priority={index === 0}
+                className="object-contain shadow-2xl rounded-sm pointer-events-none"
                 draggable={false}
               />
             </div>

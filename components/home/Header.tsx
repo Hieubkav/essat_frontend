@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Menu, X, Phone, ChevronDown, Home, Search, Mail } from 'lucide-react';
 import { SearchModal } from './SearchModal';
-import { getSettingsData, getMenusData, MenuItem, SettingsConfig } from '@/lib/homeApi';
+import { useHomeData } from './HomeDataProvider';
+import { MenuItem } from '@/lib/homeApi';
 import Image from 'next/image';
 
 // Menu tĩnh Trang chủ luôn hiển thị đầu tiên
@@ -19,12 +20,20 @@ const FallbackLogo: React.FC<{ siteName?: string | null }> = ({ siteName }) => (
 );
 
 export const Header: React.FC = () => {
+  const { settings, menus } = useHomeData();
+  
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [mobileSubmenuOpen, setMobileSubmenuOpen] = useState<string | null>(null);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [settings, setSettings] = useState<SettingsConfig | null>(null);
-  const [navLinks, setNavLinks] = useState<MenuItem[]>([HOME_MENU]);
+
+  // Tính toán navLinks từ context data
+  const navLinks = useMemo(() => {
+    const filteredMenus = menus.filter(
+      (menu) => menu.label.toLowerCase() !== 'trang chủ'
+    );
+    return [HOME_MENU, ...filteredMenus];
+  }, [menus]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -32,31 +41,6 @@ export const Header: React.FC = () => {
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [settingsData, menusData] = await Promise.all([
-          getSettingsData(),
-          getMenusData(),
-        ]);
-
-        if (settingsData) {
-          setSettings(settingsData);
-        }
-
-        // Lọc bỏ menu Trang chủ từ API (nếu có) vì đã có HOME_MENU cứng
-        const filteredMenus = menusData.filter(
-          (menu) => menu.label.toLowerCase() !== 'trang chủ'
-        );
-        setNavLinks([HOME_MENU, ...filteredMenus]);
-      } catch (error) {
-        console.error('Failed to fetch header data:', error);
-      }
-    };
-
-    fetchData();
   }, []);
 
   const toggleMobileSubmenu = (label: string) => {

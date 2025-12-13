@@ -1,12 +1,12 @@
 'use client';
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
+import Image from 'next/image';
 import { ArrowRight, ArrowUpRight, ChevronLeft, ChevronRight } from 'lucide-react';
-import { getNewsData, NewsConfig } from '@/lib/homeApi';
+import { useHomeData } from './HomeDataProvider';
 
 export const News: React.FC = () => {
-  const [config, setConfig] = useState<NewsConfig | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { news: config, isLoading } = useHomeData();
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -35,23 +35,6 @@ export const News: React.FC = () => {
         behavior: 'smooth',
       });
     }
-  }, []);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const data = await getNewsData();
-        if (data) {
-          setConfig(data);
-        }
-      } catch (error) {
-        console.error('Failed to fetch news data:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
   }, []);
 
   useEffect(() => {
@@ -162,10 +145,13 @@ export const News: React.FC = () => {
             >
               <div className="group flex flex-col h-full bg-white rounded-2xl border border-slate-100 overflow-hidden hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-300">
                 <div className="relative aspect-[16/10] overflow-hidden bg-slate-100">
-                  <img
-                    src={item.image}
+                  <Image
+                    src={item.image || '/placeholder.png'}
                     alt={item.title}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 pointer-events-none"
+                    fill
+                    sizes="(max-width: 640px) 160px, (max-width: 768px) 300px, 350px"
+                    loading={index < 3 ? 'eager' : 'lazy'}
+                    className="object-cover transition-transform duration-700 group-hover:scale-105 pointer-events-none"
                     draggable={false}
                   />
                 </div>

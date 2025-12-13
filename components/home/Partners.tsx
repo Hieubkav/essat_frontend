@@ -1,28 +1,11 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { getPartnersData, PartnersConfig } from '@/lib/homeApi';
+import React from 'react';
+import Image from 'next/image';
+import { useHomeData } from './HomeDataProvider';
 
 export const Partners: React.FC = () => {
-  const [config, setConfig] = useState<PartnersConfig | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const data = await getPartnersData();
-        if (data) {
-          setConfig(data);
-        }
-      } catch (error) {
-        console.error('Failed to fetch partners data:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
+  const { partners: config, isLoading } = useHomeData();
 
   if (isLoading) {
     return (
@@ -75,11 +58,13 @@ export const Partners: React.FC = () => {
                   key={`${partner.name}-${index}`}
                   className="mx-8 md:mx-12 flex items-center justify-center min-w-[140px] md:min-w-[180px]"
                >
-                 <div className="relative group/logo cursor-pointer transition-all duration-300">
-                    <img
-                      src={partner.logo}
+                 <div className="relative group/logo cursor-pointer transition-all duration-300 h-12 md:h-16 w-[140px] md:w-[180px]">
+                    <Image
+                      src={partner.logo || '/placeholder.png'}
                       alt={partner.name}
-                      className="h-12 md:h-16 w-auto object-contain"
+                      fill
+                      sizes="180px"
+                      className="object-contain"
                       draggable={false}
                     />
                  </div>

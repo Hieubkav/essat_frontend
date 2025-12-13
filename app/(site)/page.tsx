@@ -1,3 +1,4 @@
+import { HomeDataProvider } from '@/components/home/HomeDataProvider';
 import { Header } from '@/components/home/Header';
 import { Hero } from '@/components/home/Hero';
 import { Stats } from '@/components/home/Stats';
@@ -15,18 +16,20 @@ export const metadata = {
 
 export default function Home() {
     return (
-        <div className="min-h-screen bg-white">
-            <Header />
-            <main>
-                <Hero />
-                <Stats />
-                <About />
-                <CategoryList />
-                <Products />
-                <Partners />
-                <News />
-            </main>
-            <Footer />
-        </div>
+        <HomeDataProvider>
+            <div className="min-h-screen bg-white">
+                <Header />
+                <main>
+                    <Hero />
+                    <Stats />
+                    <About />
+                    <CategoryList />
+                    <Products />
+                    <Partners />
+                    <News />
+                </main>
+                <Footer />
+            </div>
+        </HomeDataProvider>
     );
 }

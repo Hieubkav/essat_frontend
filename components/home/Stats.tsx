@@ -1,28 +1,11 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { getStatsData, StatItem } from '@/lib/homeApi';
+import React from 'react';
+import { useHomeData } from './HomeDataProvider';
 
 export const Stats: React.FC = () => {
-  const [stats, setStats] = useState<StatItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const data = await getStatsData();
-        if (data?.items && data.items.length > 0) {
-          setStats(data.items);
-        }
-      } catch (error) {
-        console.error('Failed to fetch stats data:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
+  const { stats: statsData, isLoading } = useHomeData();
+  const stats = statsData?.items ?? [];
 
   if (isLoading) {
     return (

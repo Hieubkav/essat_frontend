@@ -1,12 +1,12 @@
 'use client';
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
+import Image from 'next/image';
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
-import { getFeaturedProductsData, FeaturedProductsConfig } from '@/lib/homeApi';
+import { useHomeData } from './HomeDataProvider';
 
 export const Products: React.FC = () => {
-  const [config, setConfig] = useState<FeaturedProductsConfig | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { products: config, isLoading } = useHomeData();
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -35,23 +35,6 @@ export const Products: React.FC = () => {
         behavior: 'smooth',
       });
     }
-  }, []);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const data = await getFeaturedProductsData();
-        if (data) {
-          setConfig(data);
-        }
-      } catch (error) {
-        console.error('Failed to fetch products data:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
   }, []);
 
   useEffect(() => {
@@ -181,10 +164,13 @@ export const Products: React.FC = () => {
               <div className="group h-full bg-white rounded-xl border border-slate-100 p-3 sm:p-4 transition-all duration-300 hover:shadow-lg hover:border-primary/20 flex flex-col">
 
                 <div className="relative aspect-square overflow-hidden bg-slate-50 rounded-lg mb-3 sm:mb-4 p-2 sm:p-4">
-                  <img
-                    src={product.image}
+                  <Image
+                    src={product.image || '/placeholder.png'}
                     alt={product.name}
-                    className="w-full h-full object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-500 pointer-events-none"
+                    fill
+                    sizes="(max-width: 640px) 160px, (max-width: 768px) 260px, 320px"
+                    loading={index < 4 ? 'eager' : 'lazy'}
+                    className="object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-500 pointer-events-none"
                     draggable={false}
                   />
                 </div>

@@ -1,29 +1,12 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Quote, CheckCircle2 } from 'lucide-react';
-import { getAboutData, AboutConfig, AboutFeature } from '@/lib/homeApi';
+import { useHomeData } from './HomeDataProvider';
+import { AboutFeature } from '@/lib/homeApi';
 
 export const About: React.FC = () => {
-  const [about, setAbout] = useState<AboutConfig | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const data = await getAboutData();
-        if (data) {
-          setAbout(data);
-        }
-      } catch (error) {
-        console.error('Failed to fetch about data:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
+  const { about, isLoading } = useHomeData();
 
   if (isLoading) {
     return (

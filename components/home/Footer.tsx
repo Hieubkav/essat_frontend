@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Facebook, ChevronRight } from 'lucide-react';
-import { getFooterData, FooterConfig, SocialLink } from '@/lib/homeApi';
+import { useHomeData } from './HomeDataProvider';
+import { SocialLink } from '@/lib/homeApi';
 
 // Helper function để lấy URL từ social_links array
 const getSocialUrl = (socialLinks: SocialLink[] | undefined, platform: string): string => {
@@ -11,25 +12,7 @@ const getSocialUrl = (socialLinks: SocialLink[] | undefined, platform: string): 
 };
 
 export const Footer: React.FC = () => {
-  const [footer, setFooter] = useState<FooterConfig | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const data = await getFooterData();
-        if (data) {
-          setFooter(data);
-        }
-      } catch (error) {
-        console.error('Failed to fetch footer data:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
+  const { footer, isLoading } = useHomeData();
 
   const textColor = "text-green-50/80";
   const hoverColor = "hover:text-white";

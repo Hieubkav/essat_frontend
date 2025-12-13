@@ -1,5 +1,56 @@
 import api from './api';
 
+// ==================== HOME PAGE DATA (Single Endpoint) ====================
+
+export interface HomePageData {
+  settings: SettingsConfig;
+  menus: MenuItem[];
+  components: {
+    hero_carousel?: HeroConfig;
+    stats?: StatsConfig;
+    about?: AboutConfig;
+    product_categories?: ProductCategoriesConfig;
+    featured_products?: FeaturedProductsConfig;
+    partners?: PartnersConfig;
+    news?: NewsConfig;
+    footer?: FooterConfig;
+  };
+}
+
+export interface HomePageResponse {
+  success: boolean;
+  data: HomePageData;
+}
+
+let cachedHomeData: HomePageData | null = null;
+
+/**
+ * Single endpoint fetch - giảm từ 9 requests xuống 1
+ * Cache trong memory để tránh fetch lại khi navigate
+ */
+export async function getHomePageData(): Promise<HomePageData | null> {
+  if (cachedHomeData) {
+    return cachedHomeData;
+  }
+  
+  try {
+    const response = await api.get<HomePageResponse>('/home');
+    cachedHomeData = response.data.data;
+    return cachedHomeData;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Clear cache khi cần refresh data
+ */
+export function clearHomePageCache(): void {
+  cachedHomeData = null;
+}
+
+// ==================== TYPES ====================
+
 // Types cho Settings API
 export interface SettingsConfig {
   site_name: string | null;
