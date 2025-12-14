@@ -1,15 +1,14 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
-import { ChevronRight, ArrowRight, Package } from 'lucide-react';
-import { getProductBySlug, getFeaturedProducts } from '@/lib/contentApi';
+import { ChevronRight, ArrowRight } from 'lucide-react';
+import { getProductBySlug } from '@/lib/contentApi';
 import { HomeDataProvider } from '@/components/home/HomeDataProvider';
 import { Header } from '@/components/home/Header';
 import { Footer } from '@/components/home/Footer';
 import { getHomePageData } from '@/lib/homeApi';
-import { getImageUrl } from '@/lib/utils';
 import { ProductDetailClient } from './ProductDetailClient';
+import { ProductGallery } from './ProductGallery';
 import { RelatedProductsCarousel } from './RelatedProductsCarousel';
 import { DescriptionWithExpand } from './DescriptionWithExpand';
 
@@ -33,17 +32,16 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function ProductDetailPage({ params }: PageProps) {
   const { slug } = await params;
-  const [homeData, product, featuredProducts] = await Promise.all([
+  const [homeData, product] = await Promise.all([
     getHomePageData(),
     getProductBySlug(slug),
-    getFeaturedProducts(8),
   ]);
 
   if (!product) {
     notFound();
   }
 
-  const relatedProducts = featuredProducts.filter((p) => p.id !== product.id).slice(0, 8);
+  const relatedProducts = product.related_products || [];
 
   const formatPrice = (price: string) => {
     const num = parseFloat(price);
@@ -74,46 +72,11 @@ export default async function ProductDetailPage({ params }: PageProps) {
             <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 lg:p-8 mb-6">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start">
                 {/* Left: Gallery */}
-                <div className="flex flex-col lg:flex-row gap-4 lg:sticky lg:top-24">
-                   {/* Ảnh chính */}
-                   <div className="relative aspect-square flex-1 bg-[#F8FAFC] rounded-xl overflow-hidden flex items-center justify-center p-8 group transition-colors duration-500 order-1 lg:order-2">
-                     {getImageUrl(product.thumbnail) ? (
-                       <Image
-                         src={getImageUrl(product.thumbnail)!}
-                         alt={product.name}
-                         fill
-                         className="object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-500 ease-out p-6"
-                         priority
-                       />
-                     ) : (
-                       <div className="w-full h-full flex items-center justify-center">
-                         <Package size={80} className="text-slate-300" />
-                       </div>
-                     )}
-                   </div>
-
-                   {/* Ảnh phụ */}
-                   <div className="grid grid-cols-4 lg:grid-cols-1 gap-1.5 order-2 lg:order-1">
-                     {[0, 1, 2, 3].map((idx) => (
-                       <button
-                         key={idx}
-                         className={`h-20 w-20 rounded-lg bg-[#F8FAFC] p-2 transition-all duration-300 flex-shrink-0 ${idx === 0 ? 'ring-2 ring-slate-900 ring-offset-1' : 'hover:bg-slate-100'}`}
-                       >
-                         {getImageUrl(product.thumbnail) ? (
-                           <Image
-                             src={getImageUrl(product.thumbnail)!}
-                             alt=""
-                             width={80}
-                             height={80}
-                             className="w-full h-full object-contain mix-blend-multiply opacity-80 hover:opacity-100 transition-opacity"
-                           />
-                         ) : (
-                           <div className="w-full h-full bg-slate-200 rounded" />
-                         )}
-                       </button>
-                     ))}
-                   </div>
-                </div>
+                <ProductGallery
+                  thumbnail={product.thumbnail}
+                  images={product.images || []}
+                  productName={product.name}
+                />
 
                 {/* Right: Info */}
                 <div className="flex flex-col h-full py-2">

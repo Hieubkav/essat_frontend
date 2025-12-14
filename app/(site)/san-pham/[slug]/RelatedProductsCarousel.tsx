@@ -4,11 +4,10 @@ import React, { useRef, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight, ChevronLeft, ChevronRight, Package } from 'lucide-react';
-import { Product } from '@/lib/contentApi';
-import { getImageUrl } from '@/lib/utils';
+import { ProductSimple } from '@/lib/contentApi';
 
 interface RelatedProductsCarouselProps {
-  relatedProducts: Product[];
+  relatedProducts: ProductSimple[];
 }
 
 export const RelatedProductsCarousel: React.FC<RelatedProductsCarouselProps> = ({
@@ -127,9 +126,9 @@ export const RelatedProductsCarousel: React.FC<RelatedProductsCarouselProps> = (
               <div className="group bg-white rounded-xl p-3 border border-slate-100 shadow-sm hover:shadow-lg hover:border-slate-200 hover:-translate-y-0.5 transition-all duration-300 flex flex-col h-full relative">
                 {/* Image Area */}
                 <div className="relative aspect-square bg-slate-50 rounded-lg overflow-hidden mb-3 group-hover:bg-slate-100 transition-colors">
-                  {getImageUrl(rel.thumbnail) ? (
+                  {rel.thumbnail ? (
                     <Image
-                      src={getImageUrl(rel.thumbnail)!}
+                      src={rel.thumbnail}
                       alt={rel.name}
                       fill
                       className="object-contain mix-blend-multiply p-4 transform group-hover:scale-105 transition-transform duration-500"
@@ -154,12 +153,6 @@ export const RelatedProductsCarousel: React.FC<RelatedProductsCarouselProps> = (
                       {rel.name}
                     </h3>
                   </Link>
-
-                  {rel.categories && rel.categories.length > 0 && (
-                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">
-                      {rel.categories[0].name}
-                    </div>
-                  )}
 
                   <div className="mt-auto pt-2 border-t border-slate-50 flex items-center justify-between">
                     <div className="font-bold text-sm text-primary">

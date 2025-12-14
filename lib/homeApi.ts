@@ -22,31 +22,17 @@ export interface HomePageResponse {
   data: HomePageData;
 }
 
-let cachedHomeData: HomePageData | null = null;
-
 /**
  * Single endpoint fetch - giảm từ 9 requests xuống 1
- * Cache trong memory để tránh fetch lại khi navigate
+ * Không cache trong memory để Next.js ISR có thể revalidate
  */
 export async function getHomePageData(): Promise<HomePageData | null> {
-  if (cachedHomeData) {
-    return cachedHomeData;
-  }
-  
   try {
     const response = await api.get<HomePageResponse>('/home');
-    cachedHomeData = response.data.data;
-    return cachedHomeData;
+    return response.data.data;
   } catch {
     return null;
   }
-}
-
-/**
- * Clear cache khi cần refresh data
- */
-export function clearHomePageCache(): void {
-  cachedHomeData = null;
 }
 
 // ==================== TYPES ====================

@@ -15,6 +15,10 @@ export const metadata = {
     description: 'ESAT - Đối tác công nghệ chiến lược và toàn diện. Phân phối thiết bị, cung cấp giải pháp công nghệ giúp doanh nghiệp tối ưu vận hành.',
 };
 
+// Force dynamic rendering trong development để luôn fetch data mới
+// Production sẽ dùng ISR với on-demand revalidation
+export const dynamic = 'force-dynamic';
+
 export default async function Home() {
     const data = await getHomePageData();
     const firstHeroImage = data?.components?.hero_carousel?.slides?.[0]?.image;

@@ -24,6 +24,10 @@ const baseURL = coerceLoopbackHostname(process.env.NEXT_PUBLIC_API_URL || 'http:
 
 const api = axios.create({
   baseURL,
+  // Disable caching for Next.js SSR/ISR
+  headers: {
+    'Cache-Control': 'no-cache, no-store, must-revalidate',
+  },
 });
 
 // Add token to every request (chỉ khi ở client side)

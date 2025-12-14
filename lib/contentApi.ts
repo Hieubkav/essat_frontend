@@ -40,6 +40,14 @@ export interface ProductCategory {
   updated_at: string;
 }
 
+export interface ProductSimple {
+  id: number;
+  name: string;
+  slug: string;
+  thumbnail: string | null;
+  price: string;
+}
+
 export interface Product {
   id: number;
   name: string;
@@ -47,33 +55,32 @@ export interface Product {
   description: string | null;
   content: string;
   thumbnail: string | null;
+  images: string[];
   price: string;
   active: boolean;
   order: number;
   categories?: ProductCategory[];
+  related_products?: ProductSimple[];
   created_at: string;
   updated_at: string;
 }
 
 export interface PaginationMeta {
   current_page: number;
-  from: number;
+  from: number | null;
   last_page: number;
   per_page: number;
-  to: number;
+  to: number | null;
   total: number;
+  has_more_pages?: boolean;
 }
 
 export interface PaginatedResponse<T> {
   success: boolean;
   message: string;
-  data: T[];
-  meta?: PaginationMeta;
-  links?: {
-    first: string;
-    last: string;
-    prev: string | null;
-    next: string | null;
+  data: {
+    items: T[];
+    pagination?: PaginationMeta;
   };
 }
 
@@ -93,8 +100,8 @@ export async function getPosts(params?: {
   try {
     const response = await api.get<PaginatedResponse<Post>>('/posts', { params });
     return {
-      posts: response.data.data || [],
-      meta: response.data.meta,
+      posts: response.data.data?.items || [],
+      meta: response.data.data?.pagination,
     };
   } catch {
     return { posts: [] };
@@ -130,8 +137,8 @@ export async function getCategories(params?: {
   try {
     const response = await api.get<PaginatedResponse<Category>>('/categories', { params });
     return {
-      categories: response.data.data || [],
-      meta: response.data.meta,
+      categories: response.data.data?.items || [],
+      meta: response.data.data?.pagination,
     };
   } catch {
     return { categories: [] };
@@ -157,8 +164,8 @@ export async function getProducts(params?: {
   try {
     const response = await api.get<PaginatedResponse<Product>>('/products', { params });
     return {
-      products: response.data.data || [],
-      meta: response.data.meta,
+      products: response.data.data?.items || [],
+      meta: response.data.data?.pagination,
     };
   } catch {
     return { products: [] };
@@ -174,16 +181,7 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
   }
 }
 
-export async function getFeaturedProducts(limit: number = 8): Promise<Product[]> {
-  try {
-    const response = await api.get<SingleResponse<Product[]>>('/products/featured', {
-      params: { limit },
-    });
-    return response.data.data || [];
-  } catch {
-    return [];
-  }
-}
+
 
 // ==================== PRODUCT CATEGORIES API ====================
 
@@ -194,8 +192,8 @@ export async function getProductCategories(params?: {
   try {
     const response = await api.get<PaginatedResponse<ProductCategory>>('/product-categories', { params });
     return {
-      categories: response.data.data || [],
-      meta: response.data.meta,
+      categories: response.data.data?.items || [],
+      meta: response.data.data?.pagination,
     };
   } catch {
     return { categories: [] };

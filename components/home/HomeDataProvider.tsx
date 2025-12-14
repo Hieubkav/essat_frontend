@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, ReactNode } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { 
+import {
   getHomePageData,
   HomePageData,
   SettingsConfig,
@@ -53,12 +53,19 @@ interface HomeDataProviderProps {
 }
 
 export const HomeDataProvider: React.FC<HomeDataProviderProps> = ({ children, initialData }) => {
+  // Nếu có initialData từ server, dùng luôn và không refetch
+  // initialData đã fresh từ server-side render
   const { data, isLoading } = useQuery({
     queryKey: ['home-page-data'],
     queryFn: getHomePageData,
     initialData: initialData ?? undefined,
-    staleTime: 5 * 60 * 1000,
+    // Khi có initialData, coi như data luôn fresh (không refetch ngay)
+    // Server đã fetch data mới nhất rồi
+    staleTime: initialData ? Infinity : 0,
     gcTime: 10 * 60 * 1000,
+    // Không refetch khi có initialData vì server đã fetch mới nhất
+    refetchOnMount: !initialData,
+    refetchOnWindowFocus: !initialData,
   });
 
   const value: HomeDataContextType = {

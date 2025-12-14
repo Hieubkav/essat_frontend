@@ -132,26 +132,26 @@ export const ProductsPageClient: React.FC<ProductsPageClientProps> = ({
   // Filter Content Component
   const FilterContent = () => (
     <>
-      <div className="flex items-center gap-2 mb-6 text-slate-900 font-bold text-lg tracking-tight">
-        <Filter size={18} /> Danh mục
+      <div className="flex items-center gap-2 mb-4 text-slate-900 font-bold text-base tracking-tight">
+        <Filter size={16} /> Danh mục
       </div>
 
-      <ul className="space-y-1">
+      <ul className="space-y-0.5">
         <li>
           <button
             onClick={() => {
               handleCategoryChange(null);
               setIsMobileFilterOpen(false);
             }}
-            className={`w-full text-left px-4 py-3 rounded-xl text-sm transition-all duration-200 border border-transparent
+            className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all duration-200
               ${!currentCategory
-                ? 'bg-primary text-white shadow-lg shadow-primary/30 font-semibold'
-                : 'text-slate-600 hover:bg-slate-50 hover:border-slate-200'
+                ? 'bg-primary text-white font-medium'
+                : 'text-slate-600 hover:bg-slate-50'
               }`}
           >
             <div className="flex justify-between items-center">
               Tất cả
-              {!currentCategory && <ArrowRight size={14} />}
+              {!currentCategory && <ArrowRight size={12} />}
             </div>
           </button>
         </li>
@@ -162,29 +162,29 @@ export const ProductsPageClient: React.FC<ProductsPageClientProps> = ({
                 handleCategoryChange(cat.slug);
                 setIsMobileFilterOpen(false);
               }}
-              className={`w-full text-left px-4 py-3 rounded-xl text-sm transition-all duration-200 border border-transparent
+              className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all duration-200
                 ${currentCategory === cat.slug
-                  ? 'bg-primary text-white shadow-lg shadow-primary/30 font-semibold'
-                  : 'text-slate-600 hover:bg-slate-50 hover:border-slate-200'
+                  ? 'bg-primary text-white font-medium'
+                  : 'text-slate-600 hover:bg-slate-50'
                 }`}
             >
               <div className="flex justify-between items-center">
                 {cat.name}
-                {currentCategory === cat.slug && <ArrowRight size={14} />}
+                {currentCategory === cat.slug && <ArrowRight size={12} />}
               </div>
             </button>
           </li>
         ))}
       </ul>
 
-      <div className="mt-10 pt-8 border-t border-slate-100">
-        <h3 className="font-bold text-slate-900 mb-5 text-lg tracking-tight">Khoảng giá</h3>
-        <div className="space-y-4">
+      <div className="mt-6 pt-5 border-t border-slate-100">
+        <h3 className="font-bold text-slate-900 mb-3 text-base tracking-tight">Khoảng giá</h3>
+        <div className="space-y-1">
           {priceOptions.map((option) => (
-            <label key={option.id} className="flex items-center gap-3 text-sm text-slate-600 cursor-pointer group transition-colors">
-              <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all ${priceRange === option.id ? 'border-primary bg-primary text-white' : 'border-slate-300 bg-white group-hover:border-primary'
+            <label key={option.id} className="flex items-center gap-2.5 text-sm text-slate-600 cursor-pointer group py-1.5 px-1 rounded-md hover:bg-slate-50 transition-colors">
+              <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all flex-shrink-0 ${priceRange === option.id ? 'border-primary bg-primary text-white' : 'border-slate-300 bg-white group-hover:border-primary'
                 }`}>
-                {priceRange === option.id && <Check size={12} strokeWidth={3} />}
+                {priceRange === option.id && <Check size={10} strokeWidth={3} />}
               </div>
               <input
                 type="radio"
@@ -197,7 +197,7 @@ export const ProductsPageClient: React.FC<ProductsPageClientProps> = ({
                 }}
                 className="hidden"
               />
-              <span className={`group-hover:text-slate-900 ${priceRange === option.id ? 'font-semibold text-slate-900' : ''}`}>
+              <span className={`group-hover:text-slate-900 ${priceRange === option.id ? 'font-medium text-slate-900' : ''}`}>
                 {option.label}
               </span>
             </label>
