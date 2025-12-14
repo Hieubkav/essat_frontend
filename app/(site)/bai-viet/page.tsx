@@ -19,7 +19,7 @@ export default async function PostsPage({ searchParams }: PageProps) {
   const params = await searchParams;
   const homeData = await getHomePageData();
   const { categories } = await getCategories({ per_page: 100 });
-  
+
   const categoryId = params.category
     ? categories.find((c) => c.slug === params.category)?.id
     : undefined;
@@ -33,16 +33,14 @@ export default async function PostsPage({ searchParams }: PageProps) {
 
   return (
     <HomeDataProvider initialData={homeData}>
-      <div key={pageKey} className="min-h-screen bg-slate-50 flex flex-col">
+      <div key={pageKey} className="min-h-screen bg-[#F8FAFC] flex flex-col">
         <Header />
-        <main className="flex-1">
-          <PostsPageClient
-            initialPosts={posts}
-            categories={categories}
-            initialMeta={meta}
-            currentCategory={params.category}
-          />
-        </main>
+        <PostsPageClient
+          initialPosts={posts}
+          categories={categories}
+          initialMeta={meta}
+          currentCategory={params.category}
+        />
         <Footer />
       </div>
     </HomeDataProvider>

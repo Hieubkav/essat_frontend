@@ -32,16 +32,14 @@ export default async function ProductsPage({ searchParams }: PageProps) {
 
   return (
     <HomeDataProvider initialData={homeData}>
-      <div className="min-h-screen bg-slate-50 flex flex-col">
+      <div className="min-h-screen bg-[#F8FAFC] flex flex-col overflow-x-hidden">
         <Header />
-        <main className="flex-1">
-          <ProductsPageClient
-            initialProducts={products}
-            categories={categories}
-            initialMeta={meta}
-            currentCategory={params.category}
-          />
-        </main>
+        <ProductsPageClient
+          initialProducts={products}
+          categories={categories}
+          initialMeta={meta}
+          currentCategory={params.category}
+        />
         <Footer />
       </div>
     </HomeDataProvider>

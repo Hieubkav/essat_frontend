@@ -62,15 +62,16 @@ export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => 
       setTimeout(() => {
         inputRef.current?.focus();
       }, 100);
-      document.body.style.overflow = 'hidden';
+      // Khóa cuộn dọc khi mở modal, giữ nguyên overflow-x để không làm mất cấu hình ẩn tràn ngang toàn cục
+      document.body.style.overflowY = 'hidden';
     } else {
       setQuery('');
       setFilteredProducts([]);
       setFilteredPosts([]);
-      document.body.style.overflow = 'unset';
+      document.body.style.overflowY = '';
     }
     return () => {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflowY = '';
     };
   }, [isOpen]);
 

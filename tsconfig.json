@@ -30,5 +30,5 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules", "zendashboard-ai", "esat-modern-redesign"]
+  "exclude": ["node_modules", "zendashboard-ai", "esat-modern-redesign", "esat-modern-ui-redesign"]
 }

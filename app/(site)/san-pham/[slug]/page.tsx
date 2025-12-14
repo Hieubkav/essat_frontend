@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ChevronRight, ArrowLeft, Tag, Package, Phone } from 'lucide-react';
+import { ChevronRight, ArrowRight, Package } from 'lucide-react';
 import { getProductBySlug, getFeaturedProducts } from '@/lib/contentApi';
 import { HomeDataProvider } from '@/components/home/HomeDataProvider';
 import { Header } from '@/components/home/Header';
@@ -10,6 +10,8 @@ import { Footer } from '@/components/home/Footer';
 import { getHomePageData } from '@/lib/homeApi';
 import { getImageUrl } from '@/lib/utils';
 import { ProductDetailClient } from './ProductDetailClient';
+import { RelatedProductsCarousel } from './RelatedProductsCarousel';
+import { DescriptionWithExpand } from './DescriptionWithExpand';
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -34,173 +36,138 @@ export default async function ProductDetailPage({ params }: PageProps) {
   const [homeData, product, featuredProducts] = await Promise.all([
     getHomePageData(),
     getProductBySlug(slug),
-    getFeaturedProducts(5),
+    getFeaturedProducts(8),
   ]);
 
   if (!product) {
     notFound();
   }
 
-  const relatedProducts = featuredProducts.filter((p) => p.id !== product.id).slice(0, 4);
+  const relatedProducts = featuredProducts.filter((p) => p.id !== product.id).slice(0, 8);
+
+  const formatPrice = (price: string) => {
+    const num = parseFloat(price);
+    if (isNaN(num) || num === 0) return 'Liên hệ';
+    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(num);
+  };
 
   return (
     <HomeDataProvider initialData={homeData}>
-      <div className="min-h-screen bg-slate-50 flex flex-col">
+      <div className="min-h-screen bg-[#F8FAFC] flex flex-col overflow-x-hidden">
         <Header />
         <main className="flex-1">
-          {/* Breadcrumb */}
-          <section className="bg-primary py-8">
-            <div className="container mx-auto px-4">
-              <div className="flex items-center gap-2 text-white/80 text-sm flex-wrap">
-                <Link href="/" className="hover:text-white transition-colors">
-                  Trang chủ
-                </Link>
-                <ChevronRight size={14} />
-                <Link href="/san-pham" className="hover:text-white transition-colors">
-                  Sản phẩm
-                </Link>
-                <ChevronRight size={14} />
-                <span className="text-white line-clamp-1">{product.name}</span>
-              </div>
-            </div>
-          </section>
+          <div className="container mx-auto px-4 max-w-7xl pt-2 pb-2">
+            {/* Breadcrumb */}
+            <nav className="flex items-center text-xs text-slate-500 mb-2">
+              <Link href="/" className="hover:text-primary transition-colors">
+                Trang chủ
+              </Link>
+              <ChevronRight size={12} className="mx-1.5 text-slate-400" />
+              <Link href="/san-pham" className="hover:text-primary transition-colors">
+                Sản phẩm
+              </Link>
+              <ChevronRight size={12} className="mx-1.5 text-slate-400" />
+              <span className="text-slate-700 font-medium truncate max-w-[180px] md:max-w-sm">{product.name}</span>
+            </nav>
 
-          {/* Product Detail */}
-          <section className="py-10">
-            <div className="container mx-auto px-4">
-              <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 p-6 md:p-8">
-                  {/* Product Image */}
-                  <div className="aspect-square relative rounded-xl overflow-hidden bg-slate-100">
-                    {getImageUrl(product.thumbnail) ? (
-                      <Image
-                        src={getImageUrl(product.thumbnail)!}
-                        alt={product.name}
-                        fill
-                        className="object-cover"
-                        priority
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <Package size={120} className="text-slate-300" />
-                      </div>
-                    )}
-                  </div>
+            {/* --- MAIN PRODUCT INFO SECTION --- */}
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 lg:p-8 mb-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start">
+                {/* Left: Gallery */}
+                <div className="flex flex-col lg:flex-row gap-4 lg:sticky lg:top-24">
+                   {/* Ảnh chính */}
+                   <div className="relative aspect-square flex-1 bg-[#F8FAFC] rounded-xl overflow-hidden flex items-center justify-center p-8 group transition-colors duration-500 order-1 lg:order-2">
+                     {getImageUrl(product.thumbnail) ? (
+                       <Image
+                         src={getImageUrl(product.thumbnail)!}
+                         alt={product.name}
+                         fill
+                         className="object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-500 ease-out p-6"
+                         priority
+                       />
+                     ) : (
+                       <div className="w-full h-full flex items-center justify-center">
+                         <Package size={80} className="text-slate-300" />
+                       </div>
+                     )}
+                   </div>
 
-                  {/* Product Info */}
-                  <div className="flex flex-col">
-                    {/* Categories */}
+                   {/* Ảnh phụ */}
+                   <div className="grid grid-cols-4 lg:grid-cols-1 gap-1.5 order-2 lg:order-1">
+                     {[0, 1, 2, 3].map((idx) => (
+                       <button
+                         key={idx}
+                         className={`h-20 w-20 rounded-lg bg-[#F8FAFC] p-2 transition-all duration-300 flex-shrink-0 ${idx === 0 ? 'ring-2 ring-slate-900 ring-offset-1' : 'hover:bg-slate-100'}`}
+                       >
+                         {getImageUrl(product.thumbnail) ? (
+                           <Image
+                             src={getImageUrl(product.thumbnail)!}
+                             alt=""
+                             width={80}
+                             height={80}
+                             className="w-full h-full object-contain mix-blend-multiply opacity-80 hover:opacity-100 transition-opacity"
+                           />
+                         ) : (
+                           <div className="w-full h-full bg-slate-200 rounded" />
+                         )}
+                       </button>
+                     ))}
+                   </div>
+                </div>
+
+                {/* Right: Info */}
+                <div className="flex flex-col h-full py-2">
+                  <div className="flex items-center justify-between mb-4">
                     {product.categories && product.categories.length > 0 && (
-                      <div className="flex flex-wrap gap-2 mb-4">
-                        {product.categories.map((cat) => (
-                          <Link
-                            key={cat.id}
-                            href={`/san-pham?category=${cat.slug}`}
-                            className="inline-flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary text-sm font-medium rounded-full hover:bg-primary/20 transition-colors"
-                          >
-                            <Tag size={14} />
-                            {cat.name}
-                          </Link>
-                        ))}
-                      </div>
+                      <span className="text-[11px] font-bold text-slate-500 uppercase tracking-[0.15em]">
+                        {product.categories[0].name}
+                      </span>
                     )}
+                    <ProductDetailClient content={null} />
+                  </div>
 
-                    {/* Name */}
-                    <h1 className="text-2xl md:text-3xl font-bold text-slate-800 mb-4">
-                      {product.name}
-                    </h1>
+                  <h1 className="text-2xl lg:text-3xl font-bold text-slate-900 mb-5 leading-tight tracking-tight">
+                    {product.name}
+                  </h1>
 
-                    {/* Description */}
-                    {product.description && (
-                      <p className="text-slate-600 mb-6">{product.description}</p>
-                    )}
+                  <div className="mb-6 pb-6 border-b border-slate-100">
+                    <span className="text-3xl lg:text-4xl font-medium text-slate-900 tracking-tight">
+                      {formatPrice(product.price)}
+                    </span>
+                  </div>
 
-                    {/* Price */}
-                    <div className="bg-slate-50 rounded-xl p-6 mb-6">
-                      <div className="flex items-baseline gap-3">
-                        <span className="text-3xl font-bold text-primary">
-                          {parseFloat(product.price).toLocaleString('vi-VN')}đ
-                        </span>
-                      </div>
+                  {product.description && (
+                    <div className="text-slate-600 mb-6 leading-relaxed text-sm">
+                      <p>{product.description}</p>
                     </div>
+                  )}
 
-                    {/* Contact Button */}
-                    <div className="mt-auto space-y-4">
-                      <a
-                        href={`tel:${homeData?.settings?.phone || ''}`}
-                        className="w-full flex items-center justify-center gap-2 bg-primary text-white py-4 px-6 rounded-xl font-semibold hover:bg-primary/90 transition-colors"
-                      >
-                        <Phone size={20} />
-                        Liên hệ mua hàng
-                      </a>
-                      <p className="text-center text-sm text-slate-500">
-                        Gọi ngay để được tư vấn và báo giá tốt nhất
-                      </p>
-                    </div>
+                  <div className="mt-auto">
+                    <a
+                      href={`tel:${homeData?.settings?.phone || ''}`}
+                      className="group w-full bg-slate-900 text-white font-medium rounded-full py-4 px-6 shadow-lg hover:bg-slate-800 hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center gap-2"
+                    >
+                      <span>Liên hệ tư vấn</span>
+                      <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                    </a>
                   </div>
                 </div>
-
-                {/* Product Content - Client Component for dangerouslySetInnerHTML */}
-                <ProductDetailClient content={product.content} />
-              </div>
-
-              {/* Back Button */}
-              <div className="mt-6">
-                <Link
-                  href="/san-pham"
-                  className="inline-flex items-center gap-2 text-primary hover:underline"
-                >
-                  <ArrowLeft size={18} />
-                  Quay lại danh sách sản phẩm
-                </Link>
               </div>
             </div>
-          </section>
 
-          {/* Related Products */}
-          {relatedProducts.length > 0 && (
-            <section className="py-10 bg-white">
-              <div className="container mx-auto px-4">
-                <h2 className="text-2xl font-bold text-slate-800 mb-6">
-                  Sản phẩm liên quan
-                </h2>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-                  {relatedProducts.map((relatedProduct) => (
-                    <Link
-                      key={relatedProduct.id}
-                      href={`/san-pham/${relatedProduct.slug}`}
-                      className="group bg-slate-50 rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300"
-                    >
-                      <div className="aspect-square relative overflow-hidden bg-slate-100">
-                        {getImageUrl(relatedProduct.thumbnail) ? (
-                          <Image
-                            src={getImageUrl(relatedProduct.thumbnail)!}
-                            alt={relatedProduct.name}
-                            fill
-                            className="object-cover group-hover:scale-105 transition-transform duration-500"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center">
-                            <Package size={48} className="text-slate-300" />
-                          </div>
-                        )}
-                      </div>
-                      <div className="p-4">
-                        <h3 className="font-semibold text-slate-800 text-sm line-clamp-2 group-hover:text-primary transition-colors">
-                          {relatedProduct.name}
-                        </h3>
-                        <div className="mt-2">
-                          <span className="text-primary font-bold">
-                            {parseFloat(relatedProduct.price).toLocaleString('vi-VN')}đ
-                          </span>
-                        </div>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
+            {/* --- DETAILED DESCRIPTION --- */}
+            {product.content && (
+              <div className="bg-white rounded-2xl p-5 lg:p-8 shadow-sm border border-slate-100 mb-10">
+                <h3 className="text-xl font-bold text-slate-900 mb-4">Mô tả sản phẩm</h3>
+                <DescriptionWithExpand content={product.content} />
               </div>
-            </section>
-          )}
+            )}
+
+            {/* --- RELATED PRODUCTS --- */}
+            {relatedProducts.length > 0 && (
+              <RelatedProductsCarousel relatedProducts={relatedProducts} />
+            )}
+          </div>
         </main>
         <Footer />
       </div>

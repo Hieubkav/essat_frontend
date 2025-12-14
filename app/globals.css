@@ -7,16 +7,17 @@
 
 @import "tailwindcss";
 
+html,
 body {
-  @apply bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 transition-colors duration-300 overflow-x-hidden;
-  font-family: 'Inter', sans-serif;
-}
-
-html {
   width: 100%;
   max-width: 100%;
   overflow-x: hidden;
   scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 transition-colors duration-300;
+  font-family: 'Inter', sans-serif;
 }
 
 /* Custom scrollbar for webkit */
