@@ -51,10 +51,9 @@ export default async function ProductDetailPage({ params }: PageProps) {
 
   return (
     <HomeDataProvider initialData={homeData}>
-      <div className="min-h-screen bg-[#F8FAFC] flex flex-col overflow-x-hidden">
-        <Header />
-        <main className="flex-1">
-          <div className="container mx-auto px-4 max-w-7xl pt-2 pb-2">
+      <Header />
+      <main className="bg-[#F8FAFC]">
+        <div className="container mx-auto px-4 max-w-7xl py-4">
             {/* Breadcrumb */}
             <nav className="flex items-center text-xs text-slate-500 mb-2">
               <Link href="/" className="hover:text-primary transition-colors">
@@ -120,7 +119,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
 
             {/* --- DETAILED DESCRIPTION --- */}
             {product.content && (
-              <div className="bg-white rounded-2xl p-5 lg:p-8 shadow-sm border border-slate-100 mb-10">
+              <div className="bg-white rounded-2xl p-5 lg:p-8 shadow-sm border border-slate-100 mb-6">
                 <h3 className="text-xl font-bold text-slate-900 mb-4">Mô tả sản phẩm</h3>
                 <DescriptionWithExpand content={product.content} />
               </div>
@@ -130,10 +129,9 @@ export default async function ProductDetailPage({ params }: PageProps) {
             {relatedProducts.length > 0 && (
               <RelatedProductsCarousel relatedProducts={relatedProducts} />
             )}
-          </div>
-        </main>
-        <Footer />
-      </div>
+        </div>
+      </main>
+      <Footer />
     </HomeDataProvider>
   );
 }

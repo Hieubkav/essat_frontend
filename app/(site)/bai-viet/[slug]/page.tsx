@@ -14,7 +14,7 @@ import {
   Check,
   ChevronDown
 } from 'lucide-react';
-import { getPostBySlug, getLatestPosts } from '@/lib/contentApi';
+import { getPostBySlug } from '@/lib/contentApi';
 import { HomeDataProvider } from '@/components/home/HomeDataProvider';
 import { Header } from '@/components/home/Header';
 import { Footer } from '@/components/home/Footer';
@@ -251,21 +251,20 @@ export default function PostDetailPage() {
 
   const [homeData, setHomeData] = useState<any>(null);
   const [post, setPost] = useState<Post | null>(null);
-  const [latestPosts, setLatestPosts] = useState<Post[]>([]);
+  const [relatedPosts, setRelatedPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [homeResult, postResult, latestResult] = await Promise.all([
+        const [homeResult, postResult] = await Promise.all([
           getHomePageData(),
           getPostBySlug(slug),
-          getLatestPosts(8),
         ]);
 
         setHomeData(homeResult);
-        setPost(postResult);
-        setLatestPosts(latestResult);
+        setPost(postResult?.post || null);
+        setRelatedPosts(postResult?.related_posts || []);
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
@@ -302,10 +301,6 @@ export default function PostDetailPage() {
       </div>
     );
   }
-
-  const relatedArticles = latestPosts
-    .filter((p) => p.category?.id === post.category?.id && p.id !== post.id)
-    .slice(0, 6);
 
   return (
     <HomeDataProvider initialData={homeData}>
@@ -367,14 +362,17 @@ export default function PostDetailPage() {
 
               {/* Thumbnail */}
               {getImageUrl(post.thumbnail) && (
-                <div className="relative aspect-[21/9] overflow-hidden bg-slate-100">
-                  <Image
-                    src={getImageUrl(post.thumbnail)!}
-                    alt={post.title}
-                    fill
-                    className="object-cover"
-                    priority
-                  />
+                <div className="relative w-full overflow-hidden bg-gradient-to-br from-slate-100 to-slate-200/50">
+                  <div className="relative w-full flex items-center justify-center py-4 md:py-6">
+                    <Image
+                      src={getImageUrl(post.thumbnail)!}
+                      alt={post.title}
+                      width={1200}
+                      height={800}
+                      className="w-auto h-auto max-w-full max-h-[70vh] object-contain rounded-lg shadow-lg"
+                      priority
+                    />
+                  </div>
                 </div>
               )}
 
@@ -385,7 +383,7 @@ export default function PostDetailPage() {
             </article>
 
             {/* Bài viết liên quan */}
-            <RelatedPosts posts={relatedArticles} currentPostId={post.id} />
+            <RelatedPosts posts={relatedPosts} currentPostId={post.id} />
           </div>
         </main>
 

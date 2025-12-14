@@ -46,6 +46,7 @@ export interface ProductSimple {
   slug: string;
   thumbnail: string | null;
   price: string;
+  category?: string | null;
 }
 
 export interface Product {
@@ -108,9 +109,14 @@ export async function getPosts(params?: {
   }
 }
 
-export async function getPostBySlug(slug: string): Promise<Post | null> {
+export interface PostDetailResponse {
+  post: Post;
+  related_posts: Post[];
+}
+
+export async function getPostBySlug(slug: string): Promise<PostDetailResponse | null> {
   try {
-    const response = await api.get<SingleResponse<Post>>(`/posts/${slug}`);
+    const response = await api.get<SingleResponse<PostDetailResponse>>(`/posts/${slug}`);
     return response.data.data;
   } catch {
     return null;

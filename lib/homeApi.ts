@@ -275,16 +275,4 @@ export interface MenuItem {
   children?: MenuChild[];
 }
 
-export interface MenusResponse {
-  success: boolean;
-  data: MenuItem[];
-}
 
-export async function getMenusData(): Promise<MenuItem[]> {
-  try {
-    const response = await api.get<MenusResponse>('/menus');
-    return response.data.data;
-  } catch {
-    return [];
-  }
-}

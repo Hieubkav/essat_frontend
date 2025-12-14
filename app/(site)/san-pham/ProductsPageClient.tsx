@@ -208,7 +208,7 @@ export const ProductsPageClient: React.FC<ProductsPageClientProps> = ({
   );
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] pt-2 pb-2 overflow-x-hidden">
+    <main className="bg-[#F8FAFC] py-4">
       <div className="container mx-auto px-4 max-w-7xl relative">
         <Breadcrumb items={[{ label: 'Trang chủ', href: '/' }, { label: 'Sản phẩm' }]} />
 
@@ -409,6 +409,6 @@ export const ProductsPageClient: React.FC<ProductsPageClientProps> = ({
           </div>
         </div>
       </div>
-    </div>
+    </main>
   );
 };

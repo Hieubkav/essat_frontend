@@ -3,7 +3,7 @@
 import React, { useRef, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowRight, ChevronLeft, ChevronRight, Package } from 'lucide-react';
+import { ArrowRight, ChevronLeft, ChevronRight, Package, Tag } from 'lucide-react';
 import { ProductSimple } from '@/lib/contentApi';
 
 interface RelatedProductsCarouselProps {
@@ -15,6 +15,7 @@ export const RelatedProductsCarousel: React.FC<RelatedProductsCarouselProps> = (
 }) => {
   const listRef = useRef<HTMLDivElement>(null);
   const isDragging = useRef(false);
+  const hasDragged = useRef(false);
   const startX = useRef(0);
   const startScroll = useRef(0);
 
@@ -35,9 +36,9 @@ export const RelatedProductsCarousel: React.FC<RelatedProductsCarouselProps> = (
     const el = listRef.current;
     if (!el) return;
     isDragging.current = true;
+    hasDragged.current = false;
     startX.current = e.clientX;
     startScroll.current = el.scrollLeft;
-    el.setPointerCapture(e.pointerId);
   };
 
   const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -45,20 +46,26 @@ export const RelatedProductsCarousel: React.FC<RelatedProductsCarouselProps> = (
     const el = listRef.current;
     if (!el) return;
     const delta = e.clientX - startX.current;
+    if (Math.abs(delta) > 5) {
+      hasDragged.current = true;
+    }
     el.scrollLeft = startScroll.current - delta;
   };
 
-  const onPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+  const onPointerUp = () => {
     if (!isDragging.current) return;
     isDragging.current = false;
-    const el = listRef.current;
-    if (el?.hasPointerCapture(e.pointerId)) {
-      el.releasePointerCapture(e.pointerId);
+  };
+
+  const handleClick = (e: React.MouseEvent) => {
+    if (hasDragged.current) {
+      e.preventDefault();
+      e.stopPropagation();
     }
   };
 
   return (
-    <div className="border-t border-slate-200 pt-8">
+    <div className="border-t border-slate-200 pt-6 pb-2">
       <div className="flex items-center justify-between mb-4 gap-3">
         <div className="flex items-center gap-3">
           <h3 className="text-lg font-bold text-slate-900 tracking-tight m-0">Sản phẩm liên quan</h3>
@@ -125,7 +132,11 @@ export const RelatedProductsCarousel: React.FC<RelatedProductsCarouselProps> = (
             >
               <div className="group bg-white rounded-xl p-3 border border-slate-100 shadow-sm hover:shadow-lg hover:border-slate-200 hover:-translate-y-0.5 transition-all duration-300 flex flex-col h-full relative">
                 {/* Image Area */}
-                <div className="relative aspect-square bg-slate-50 rounded-lg overflow-hidden mb-3 group-hover:bg-slate-100 transition-colors">
+                <Link
+                    href={`/san-pham/${rel.slug}`}
+                    onClick={handleClick}
+                    className="relative aspect-square bg-slate-50 rounded-lg overflow-hidden mb-3 group-hover:bg-slate-100 transition-colors block"
+                  >
                   {rel.thumbnail ? (
                     <Image
                       src={rel.thumbnail}
@@ -141,14 +152,20 @@ export const RelatedProductsCarousel: React.FC<RelatedProductsCarouselProps> = (
 
                   {/* Hover Action */}
                   <div className="absolute inset-x-3 bottom-3 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300">
-                    <Link href={`/san-pham/${rel.slug}`} className="block w-full py-2 bg-white/90 backdrop-blur text-slate-900 rounded-lg text-xs font-bold shadow-lg text-center hover:bg-primary hover:text-white transition-colors">
+                    <span className="block w-full py-2 bg-white/90 backdrop-blur text-slate-900 rounded-lg text-xs font-bold shadow-lg text-center group-hover:bg-primary group-hover:text-white transition-colors">
                       Xem chi tiết
-                    </Link>
+                    </span>
                   </div>
-                </div>
+                </Link>
 
                 <div className="flex flex-col flex-1">
-                  <Link href={`/san-pham/${rel.slug}`}>
+                  {rel.category && (
+                    <div className="flex items-center gap-1 text-xs text-slate-500 mb-1">
+                      <Tag size={10} />
+                      <span className="truncate">{rel.category}</span>
+                    </div>
+                  )}
+                  <Link href={`/san-pham/${rel.slug}`} onClick={handleClick}>
                     <h3 className="text-slate-900 font-semibold text-sm leading-snug mb-2 hover:text-primary transition-colors min-h-[36px] line-clamp-2">
                       {rel.name}
                     </h3>
@@ -158,9 +175,13 @@ export const RelatedProductsCarousel: React.FC<RelatedProductsCarouselProps> = (
                     <div className="font-bold text-sm text-primary">
                       {formatPrice(rel.price) || <span className="text-slate-500 text-xs font-semibold">Liên hệ</span>}
                     </div>
-                    <div className="w-6 h-6 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-primary group-hover:text-white transition-colors">
+                    <Link
+                      href={`/san-pham/${rel.slug}`}
+                      onClick={handleClick}
+                      className="w-6 h-6 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-primary group-hover:text-white transition-colors"
+                    >
                       <ArrowRight size={12} />
-                    </div>
+                    </Link>
                   </div>
                 </div>
               </div>

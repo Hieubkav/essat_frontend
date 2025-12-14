@@ -29,19 +29,17 @@ export default async function Home() {
                 <link rel="preload" as="image" href={firstHeroImage} />
             )}
             <HomeDataProvider initialData={data}>
-                <div className="min-h-screen bg-white">
-                    <Header />
-                    <main>
-                        <Hero />
-                        <Stats />
-                        <About />
-                        <CategoryList />
-                        <Products />
-                        <Partners />
-                        <News />
-                    </main>
-                    <Footer />
-                </div>
+                <Header />
+                <main className="bg-white">
+                    <Hero />
+                    <Stats />
+                    <About />
+                    <CategoryList />
+                    <Products />
+                    <Partners />
+                    <News />
+                </main>
+                <Footer />
             </HomeDataProvider>
         </>
     );
