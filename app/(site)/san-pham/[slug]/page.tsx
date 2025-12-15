@@ -106,7 +106,9 @@ export default async function ProductDetailPage({ params }: PageProps) {
 
                   <div className="mt-auto">
                     <a
-                      href={`tel:${homeData?.settings?.phone || ''}`}
+                      href="/lien-he-mua-hang"
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="group w-full bg-slate-900 text-white font-medium rounded-full py-4 px-6 shadow-lg hover:bg-slate-800 hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center gap-2"
                     >
                       <span>Liên hệ tư vấn</span>

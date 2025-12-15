@@ -11,7 +11,7 @@ interface DescriptionWithExpandProps {
 export function DescriptionWithExpand({ content, maxLines = 3 }: DescriptionWithExpandProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  // Tinh toan so dong gan dung dua tren noi dung
+  // Tính toán số dòng gần đúng dựa trên nội dung
   const lines = content.split('\n').length;
   const shouldShowButton = lines > maxLines || content.length > 500;
 
@@ -40,7 +40,7 @@ export function DescriptionWithExpand({ content, maxLines = 3 }: DescriptionWith
         onClick={() => setIsExpanded(!isExpanded)}
         className="mt-4 flex items-center gap-2 px-4 py-2 text-slate-900 font-semibold hover:text-slate-700 transition-colors group"
       >
-        <span>{isExpanded ? 'An bot' : 'Xem them'}</span>
+        <span>{isExpanded ? 'Ẩn bớt' : 'Xem thêm'}</span>
         <ChevronDown
           size={18}
           className={`transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}
