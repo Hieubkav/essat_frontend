@@ -14,7 +14,7 @@ export const dynamic = 'force-dynamic';
 export default async function LienHeMuaHangPage() {
   const data = await getHomePageData();
   const settings = data?.settings;
-  const footer = data?.components?.footer;
+  const footer = data?.components?.data?.footer;
 
   return (
     <HomeDataProvider initialData={data}>

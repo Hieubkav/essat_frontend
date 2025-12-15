@@ -6,14 +6,17 @@ export interface HomePageData {
   settings: SettingsConfig;
   menus: MenuItem[];
   components: {
-    hero_carousel?: HeroConfig;
-    stats?: StatsConfig;
-    about?: AboutConfig;
-    product_categories?: ProductCategoriesConfig;
-    featured_products?: FeaturedProductsConfig;
-    partners?: PartnersConfig;
-    news?: NewsConfig;
-    footer?: FooterConfig;
+    order: string[];
+    data: {
+      hero_carousel?: HeroConfig;
+      stats?: StatsConfig;
+      about?: AboutConfig;
+      product_categories?: ProductCategoriesConfig;
+      featured_products?: FeaturedProductsConfig;
+      partners?: PartnersConfig;
+      news?: NewsConfig;
+      footer?: FooterConfig;
+    };
   };
 }
 

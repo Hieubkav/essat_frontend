@@ -8,6 +8,7 @@ import { Products } from '@/components/home/Products';
 import { Partners } from '@/components/home/Partners';
 import { News } from '@/components/home/News';
 import { Footer } from '@/components/home/Footer';
+import { DynamicComponents } from '@/components/home/DynamicComponents';
 import { getHomePageData } from '@/lib/homeApi';
 
 export const metadata = {
@@ -19,9 +20,21 @@ export const metadata = {
 // Production sẽ dùng ISR với on-demand revalidation
 export const dynamic = 'force-dynamic';
 
+// Map type từ API sang component
+const COMPONENT_MAP: Record<string, React.ComponentType> = {
+    hero_carousel: Hero,
+    stats: Stats,
+    about: About,
+    product_categories: CategoryList,
+    featured_products: Products,
+    partners: Partners,
+    news: News,
+};
+
 export default async function Home() {
     const data = await getHomePageData();
-    const firstHeroImage = data?.components?.hero_carousel?.slides?.[0]?.image;
+    const firstHeroImage = data?.components?.data?.hero_carousel?.slides?.[0]?.image;
+    const componentOrder = data?.components?.order ?? [];
 
     return (
         <>
@@ -31,13 +44,7 @@ export default async function Home() {
             <HomeDataProvider initialData={data}>
                 <Header />
                 <main className="bg-white">
-                    <Hero />
-                    <Stats />
-                    <About />
-                    <CategoryList />
-                    <Products />
-                    <Partners />
-                    <News />
+                    <DynamicComponents order={componentOrder} componentMap={COMPONENT_MAP} />
                 </main>
                 <Footer />
             </HomeDataProvider>

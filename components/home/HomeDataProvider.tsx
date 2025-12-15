@@ -21,6 +21,7 @@ interface HomeDataContextType {
   isLoading: boolean;
   settings: SettingsConfig | null;
   menus: MenuItem[];
+  componentOrder: string[];
   hero: HeroConfig | null;
   stats: StatsConfig | null;
   about: AboutConfig | null;
@@ -35,6 +36,7 @@ const HomeDataContext = createContext<HomeDataContextType>({
   isLoading: true,
   settings: null,
   menus: [],
+  componentOrder: [],
   hero: null,
   stats: null,
   about: null,
@@ -68,18 +70,20 @@ export const HomeDataProvider: React.FC<HomeDataProviderProps> = ({ children, in
     refetchOnWindowFocus: !initialData,
   });
 
+  const componentsData = data?.components?.data;
   const value: HomeDataContextType = {
     isLoading: initialData ? false : isLoading,
     settings: data?.settings ?? null,
     menus: data?.menus ?? [],
-    hero: data?.components?.hero_carousel ?? null,
-    stats: data?.components?.stats ?? null,
-    about: data?.components?.about ?? null,
-    categories: data?.components?.product_categories ?? null,
-    products: data?.components?.featured_products ?? null,
-    partners: data?.components?.partners ?? null,
-    news: data?.components?.news ?? null,
-    footer: data?.components?.footer ?? null,
+    componentOrder: data?.components?.order ?? [],
+    hero: componentsData?.hero_carousel ?? null,
+    stats: componentsData?.stats ?? null,
+    about: componentsData?.about ?? null,
+    categories: componentsData?.product_categories ?? null,
+    products: componentsData?.featured_products ?? null,
+    partners: componentsData?.partners ?? null,
+    news: componentsData?.news ?? null,
+    footer: componentsData?.footer ?? null,
   };
 
   return (
