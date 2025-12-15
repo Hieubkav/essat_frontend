@@ -33,6 +33,11 @@ const nextConfig: NextConfig = {
         port: '8000',
         pathname: '/storage/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'esat.vitrasau.info.vn',
+        pathname: '/storage/**',
+      },
     ],
     unoptimized: true,
   },
